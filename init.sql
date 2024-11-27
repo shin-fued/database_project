@@ -9,7 +9,7 @@ drop table if exists transactions cascade;
 
 create table if not exists drugs_available(
                                               id int unique,
-                                              drug_name varchar(40),
+                                              drug_name varchar(40) unique,
                                               price float(2),
                                               approval boolean default FALSE,
                                               primary key (id)
@@ -56,8 +56,8 @@ CREATE TABLE IF NOT EXISTS stock(
                                         foreign key(drug_id)
                                             references drugs_available(id),
                                     drug_name varchar(255) not null,
-                                    amount INT,
-                                    order_id int,
+                                    amount INT not null,
+                                    order_id int default null,
                                     constraint fk_order
                                         foreign key(order_id)
                                             references stock_order(id),
@@ -97,3 +97,25 @@ insert into drugs_available(id,drug_name, price) values (5, 'adapelene', 60.00) 
 insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (1, 'kanat tangwongsan', 60000, 'pharmacist', 1) ON CONFLICT DO NOTHING;
 insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (2, 'Boonyanit Matayomchit', 20000, 'staff', 2) ON CONFLICT DO NOTHING;
 insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (3, 'piti ongmonkonkul', 40000, 'staff', 1) ON CONFLICT DO NOTHING ;
+
+insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (4, 'Tath Kanchanarin', 50000, 'pharmacist', 1) ON CONFLICT DO NOTHING;
+insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (5, 'Austin Maddison', 30000, 'staff', 2) ON CONFLICT DO NOTHING;
+insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (6, 'Phavarisa Limchitti', 70000, 'pharmacist', 2) ON CONFLICT DO NOTHING ;
+
+insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (7, 'Leibniz', 20000, 'staff', 2) ON CONFLICT DO NOTHING;
+insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (8, 'Feynmann', 20000, 'staff', 2) ON CONFLICT DO NOTHING;
+insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (9, 'Patrick Batemann', 15000, 'staff', 1) ON CONFLICT DO NOTHING;
+
+insert into drugs_available(id,drug_name, price) values (6, 'bismuth subsalicylate', 60.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, approval, price) values (7, 'Adderall', TRUE, 200.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, approval, price) values (8, 'Lexapro', TRUE, 150.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (9, 'insulin', 60.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (10, 'adapelene', 60.00) ON CONFLICT DO NOTHING;
+
+
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 1, 'paracetamol', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 1, 'paracetamol', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 7, 'Adderall', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 7, 'Adderall', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 6, 'bismuth subsalicylate', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 6, 'bismuth subsalicylate', 1000) ON CONFLICT DO NOTHING;
