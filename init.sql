@@ -6,6 +6,7 @@ drop table if exists employee cascade;
 drop table if exists stock_order cascade;
 drop table if exists stock cascade;
 drop table if exists transactions cascade;
+drop table if exists shift cascade;
 
 create table if not exists drugs_available(
                                               id int unique,
@@ -32,6 +33,16 @@ CREATE TABLE IF NOT EXISTS employee (
         foreign key (branch_id)
             references branches(id),
                                         primary key (id)
+);
+
+CREATE TABLE IF NOT EXISTS shift(
+                                            date date,
+                                           employee_id INT not null,
+                                           constraint fk_employee
+                                               foreign key(employee_id)
+                                                   references employee(id),
+                                            shift_number INT,
+    primary key (date, shift_number, employee_id)
 );
 
 create table if not exists stock_order(
@@ -106,6 +117,10 @@ insert into employee(id,employee_name, employee_salary, type_employee, branch_id
 insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (8, 'Feynmann', 20000, 'staff', 2) ON CONFLICT DO NOTHING;
 insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (9, 'Patrick Batemann', 15000, 'staff', 1) ON CONFLICT DO NOTHING;
 
+insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (10, 'Luffy', 20000, 'staff', 2) ON CONFLICT DO NOTHING;
+insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (11, 'Sanji', 20000, 'staff', 2) ON CONFLICT DO NOTHING;
+insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (12, 'Batman', 15000, 'staff', 1) ON CONFLICT DO NOTHING;
+
 insert into drugs_available(id,drug_name, price) values (6, 'bismuth subsalicylate', 60.00) ON CONFLICT DO NOTHING;
 insert into drugs_available(id,drug_name, approval, price) values (7, 'Adderall', TRUE, 200.00) ON CONFLICT DO NOTHING;
 insert into drugs_available(id,drug_name, approval, price) values (8, 'Lexapro', TRUE, 150.00) ON CONFLICT DO NOTHING;
@@ -119,3 +134,65 @@ insert into stock(branch_id,drug_id, drug_name, amount) values (1, 7, 'Adderall'
 insert into stock(branch_id,drug_id, drug_name, amount) values (2, 7, 'Adderall', 1000) ON CONFLICT DO NOTHING;
 insert into stock(branch_id,drug_id, drug_name, amount) values (1, 6, 'bismuth subsalicylate', 1000) ON CONFLICT DO NOTHING;
 insert into stock(branch_id,drug_id, drug_name, amount) values (2, 6, 'bismuth subsalicylate', 1000) ON CONFLICT DO NOTHING;
+
+insert into drugs_available(id,drug_name, price) values (11, 'Lyrica', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (12, 'Melatonin', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (13, 'Meloxicam', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (14, 'Metformin', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (15, 'Methadone', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (16, 'Methotrexate', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (17, 'Metoprolol', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (18, 'Mounjaro', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (19, 'Naltrexone', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (20, 'Naproxen', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (21, 'Narcan', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (22, 'Nurtec', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (23, 'Omeprazole', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (24, 'Opdivo', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (25, 'Otezla', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (26, 'Ozempic', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (27, 'Pantoprazole', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (28, 'Plan', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (29, 'B', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (30, 'Prednisone', 250.00) ON CONFLICT DO NOTHING;
+
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 11, 'Lyrica', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 11, 'Lyrica', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 12, 'Melatonin', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 12, 'Melatonin', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 13, 'Meloxicam', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 13, 'Meloxicam', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 14, 'Metformin', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 14, 'Metformin', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 15, 'Methadone', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 15, 'Methadone', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 16, 'Methotrexate', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 16, 'Methotrexate', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 17, 'Metoprolol', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 17, 'Metoprolol', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 18, 'Mounjaro', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 18, 'Mounjaro', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 19, 'Naltrexone', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 19, 'Naltrexone', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 20, 'Naproxen', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 20, 'Naproxen', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 21, 'Narcan', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 21, 'Narcan', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 22, 'Nurtec', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 22, 'Nurtec', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 23, 'Omeprazole', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 23, 'Omeprazole', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 24, 'Opdivo', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 24, 'Opdivo', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 25, 'Otezla', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 25, 'Otezla', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 26, 'Ozempic', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 26, 'Ozempic', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 27, 'Pantoprazole', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 27, 'Pantoprazole', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 28, 'Plan', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 28, 'Plan', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 29, 'B', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 29, 'B', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (1, 30, 'Prednisone', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount) values (2, 30, 'Prednisone', 1000) ON CONFLICT DO NOTHING;
