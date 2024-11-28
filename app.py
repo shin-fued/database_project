@@ -27,12 +27,12 @@ def shift():
     if request.method == 'POST':
         id = request.form['id']
         name = request.form['name']
-        #cur.execute("SELECT * FROM employee WHERE id = %s AND employee_name = %s", (id, name))
-        #exists = cur.fetchone()
+        cur.execute("SELECT * FROM employee WHERE id = %s AND employee_name = %s", (id, name))
+        exists = cur.fetchone()
         if not id:
             flash('ID is required!')
-        #if exists == None:
-            #flash('Youre not an employee')
+        if exists == None:
+            flash('Youre not an employee')
         else:
             t = datetime.now().hour
             day = datetime.now().date().isoformat()

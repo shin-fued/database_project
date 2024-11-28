@@ -1,0 +1,4 @@
+ls ="fentanyl acetaminophen insulin adapelene bismuth-subsalicylate Adderall Lexapro Amoxicillin Valium Lyrica Melatonin Meloxicam Metformin Methadone Methotrexate Metoprolol Mounjaro Naltrexone Naproxen Narcan Nurtec Omeprazole Opdivo Otezla Ozempic Pantoprazole PlanB Prednisone".split(" ")
+for i in range(len(ls)):
+    print("insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, {0}, '{1}', 1000, '2030-01-01') ON CONFLICT DO NOTHING;".format(i+2, ls[i]))
+    print("insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, {0}, '{1}', 1000, '2030-01-01') ON CONFLICT DO NOTHING;".format(i+2, ls[i]))

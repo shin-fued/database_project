@@ -29,32 +29,33 @@ CREATE TABLE IF NOT EXISTS employee (
                                         employee_salary INT not null,
                                         type_employee employee_type not null,
                                         branch_id int,
-    constraint fk_branch
-        foreign key (branch_id)
-            references branches(id),
+                                        constraint fk_branch
+                                            foreign key (branch_id)
+                                                references branches(id),
                                         primary key (id)
 );
 
 CREATE TABLE IF NOT EXISTS shift(
-                                            date date,
-                                           employee_id INT not null,
-                                           constraint fk_employee
-                                               foreign key(employee_id)
-                                                   references employee(id),
-                                            shift_number INT,
-    primary key (date, shift_number, employee_id)
+                                    date date,
+                                    employee_id INT not null,
+                                    constraint fk_employee
+                                        foreign key(employee_id)
+                                            references employee(id),
+                                    shift_number INT,
+                                    primary key (date, shift_number, employee_id)
 );
 
 create table if not exists stock_order(
-                                          id int unique,
+                                          order_id int not null unique ,
                                           drug_id int not null,
                                           constraint fk_drug
                                               foreign key(drug_id)
                                                   references drugs_available(id),
-                                        amount int not null,
-                                        time timestamp,
-                                        order_placed boolean,
-                                         primary key (id)
+                                          amount int not null,
+                                          time timestamp,
+                                          order_placed boolean,
+                                            expiration_date date,
+                                          primary key (order_id)
 );
 
 CREATE TABLE IF NOT EXISTS stock(
@@ -68,70 +69,72 @@ CREATE TABLE IF NOT EXISTS stock(
                                             references drugs_available(id),
                                     drug_name varchar(255) not null,
                                     amount INT not null,
+    expiration_date date,
                                     order_id int default null,
                                     constraint fk_order
                                         foreign key(order_id)
-                                            references stock_order(id),
-                                    primary key (drug_id, branch_id)
+                                            references stock_order(order_id),
+            primary key (drug_id, branch_id)
 );
 
 
 CREATE TABLE IF NOT EXISTS transactions(
-                                            purchaser VARCHAR(255) not null,
-                                            drug_name VARCHAR(255) not null,
-                                            drug_id int not null,
-                                            constraint fk_drug
-                                                foreign key(drug_id)
-                                                    references drugs_available(id),
-                                            employee_id INT not null,
-                                            constraint fk_employee
-                                                foreign key(employee_id)
-                                                    references employee(id),
-                                            quantity INT not null,
-                                            price numeric(2) not null,
-                                            time timestamp not null,
-                                            branch_id int,
-                                            constraint fk_branch
-                                                foreign key(branch_id)
-                                                    references branches(id),
-                                            primary key (purchaser, drug_id, branch_id)
+                                           purchaser VARCHAR(255) not null,
+                                           drug_name VARCHAR(255) not null,
+                                           drug_id int not null,
+                                           constraint fk_drug
+                                               foreign key(drug_id)
+                                                   references drugs_available(id),
+                                           employee_id INT not null,
+                                           constraint fk_employee
+                                               foreign key(employee_id)
+                                                   references employee(id),
+                                           quantity INT not null,
+                                           price numeric(2) not null,
+                                           time timestamp not null,
+                                           branch_id int,
+                                           constraint fk_branch
+                                               foreign key(branch_id)
+                                                   references branches(id),
+    approved boolean,
+                                           primary key (purchaser, drug_id, branch_id)
 );
 
 
 
 -- make log table
 CREATE TABLE IF NOT EXISTS drugs_available_log (
-    log_id SERIAL PRIMARY KEY,
-    action_type VARCHAR(10) NOT NULL, -- 'INSERT', 'UPDATE', or 'DELETE'
-    log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id INT,
-    drug_name VARCHAR(40),
-    price FLOAT,
-    approval BOOLEAN
+                                                   log_id SERIAL PRIMARY KEY,
+                                                   action_type VARCHAR(10) NOT NULL, -- 'INSERT', 'UPDATE', or 'DELETE'
+                                                   log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                                   id INT,
+                                                   drug_name VARCHAR(40),
+                                                   price FLOAT,
+                                                   approval BOOLEAN
 );
 CREATE TABLE IF NOT EXISTS branches_log (
-    log_id SERIAL PRIMARY KEY,
-    action_type VARCHAR(10) NOT NULL,
-    log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id INT,
-    branch_name VARCHAR(40),
-    location VARCHAR(255)
+                                            log_id SERIAL PRIMARY KEY,
+                                            action_type VARCHAR(10) NOT NULL,
+                                            log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                            id INT,
+                                            branch_name VARCHAR(40),
+                                            location VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS employee_log (
-    log_id SERIAL PRIMARY KEY,
-    action_type VARCHAR(10) NOT NULL,
-    log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id INT,
-    employee_name VARCHAR(255),
-    employee_salary INT,
-    type_employee employee_type,
-    branch_id INT
+                                            log_id SERIAL PRIMARY KEY,
+                                            action_type VARCHAR(10) NOT NULL,
+                                            log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                            id INT,
+                                            employee_name VARCHAR(255),
+                                            employee_salary INT,
+                                            type_employee employee_type,
+                                            branch_id INT
 );
 
 
 CREATE OR REPLACE FUNCTION log_drugs_available_changes()
-RETURNS TRIGGER AS $$
+    RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'INSERT') THEN
         INSERT INTO drugs_available_log(action_type, id, drug_name, price, approval)
@@ -149,7 +152,7 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION log_branches_changes()
-RETURNS TRIGGER AS $$
+    RETURNS TRIGGER AS $$
 BEGIN
     IF (TG_OP = 'INSERT') THEN
         INSERT INTO branches_log(action_type, id, branch_name, location)
@@ -165,31 +168,31 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION log_employee_changes()
-RETURNS TRIGGER AS $$
+    RETURNS TRIGGER AS $$
 BEGIN
     IF TG_OP = 'INSERT' THEN
         INSERT INTO employee_log (
             action_type, id, employee_name, employee_salary, type_employee, branch_id
         )
         VALUES (
-            'INSERT', NEW.id, NEW.employee_name, NEW.employee_salary, NEW.type_employee, NEW.branch_id
-        );
+                   'INSERT', NEW.id, NEW.employee_name, NEW.employee_salary, NEW.type_employee, NEW.branch_id
+               );
 
     ELSIF TG_OP = 'UPDATE' THEN
         INSERT INTO employee_log (
             action_type, id, employee_name, employee_salary, type_employee, branch_id
         )
         VALUES (
-            'UPDATE', NEW.id, NEW.employee_name, NEW.employee_salary, NEW.type_employee, NEW.branch_id
-        );
+                   'UPDATE', NEW.id, NEW.employee_name, NEW.employee_salary, NEW.type_employee, NEW.branch_id
+               );
 
     ELSIF TG_OP = 'DELETE' THEN
         INSERT INTO employee_log (
             action_type, id, employee_name, employee_salary, type_employee, branch_id
         )
         VALUES (
-            'DELETE', OLD.id, OLD.employee_name, OLD.employee_salary, OLD.type_employee, OLD.branch_id
-        );
+                   'DELETE', OLD.id, OLD.employee_name, OLD.employee_salary, OLD.type_employee, OLD.branch_id
+               );
     END IF;
 
     RETURN NULL; -- Ensures the original operation is unaffected
@@ -197,17 +200,17 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_drugs_available_changes
-AFTER INSERT OR UPDATE OR DELETE ON drugs_available
-FOR EACH ROW
+    AFTER INSERT OR UPDATE OR DELETE ON drugs_available
+    FOR EACH ROW
 EXECUTE FUNCTION log_drugs_available_changes();
 
 CREATE TRIGGER trg_branches_changes
-AFTER INSERT OR UPDATE OR DELETE ON branches
-FOR EACH ROW
+    AFTER INSERT OR UPDATE OR DELETE ON branches
+    FOR EACH ROW
 EXECUTE FUNCTION log_branches_changes();
 CREATE TRIGGER employee_log_trigger
-AFTER INSERT OR UPDATE OR DELETE ON employee
-FOR EACH ROW
+    AFTER INSERT OR UPDATE OR DELETE ON employee
+    FOR EACH ROW
 EXECUTE FUNCTION log_employee_changes();
 -- end of log table features
 
@@ -220,7 +223,7 @@ CREATE OR REPLACE FUNCTION make_purchase(
     p_branch_id INT,
     quantity INT
 )
-RETURNS TEXT AS $$
+    RETURNS TEXT AS $$
 DECLARE
     current_stock INT;
     drug_price FLOAT;
@@ -230,7 +233,7 @@ BEGIN
     SELECT amount, price, drugs_available.drug_name
     INTO current_stock, drug_price, drug_name
     FROM stock
-    JOIN drugs_available ON stock.drug_id = drugs_available.id
+             JOIN drugs_available ON stock.drug_id = drugs_available.id
     WHERE stock.drug_id = p_drug_id AND stock.branch_id = p_drug_id;
 
     IF NOT FOUND THEN
@@ -252,8 +255,8 @@ BEGIN
         purchaser, drug_name, drug_id, employee_id, quantity,price, time, branch_id
     )
     VALUES (
-        $1, drug_name, $2, $3, $5,drug_price * $5, CURRENT_TIMESTAMP, $4
-    );
+               $1, drug_name, $2, $3, $5,drug_price * $5, CURRENT_TIMESTAMP, $4
+           );
 
     -- Return a success message
     RETURN FORMAT('Purchase successful! %s x%d bought for $%.2f', drug_name, quantity, drug_price * quantity);
@@ -288,19 +291,11 @@ insert into employee(id,employee_name, employee_salary, type_employee, branch_id
 insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (11, 'Sanji', 20000, 'staff', 2) ON CONFLICT DO NOTHING;
 insert into employee(id,employee_name, employee_salary, type_employee, branch_id) values (12, 'Batman', 15000, 'staff', 1) ON CONFLICT DO NOTHING;
 
-insert into drugs_available(id,drug_name, price) values (6, 'bismuth subsalicylate', 60.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (6, 'bismuth-subsalicylate', 60.00) ON CONFLICT DO NOTHING;
 insert into drugs_available(id,drug_name, approval, price) values (7, 'Adderall', TRUE, 200.00) ON CONFLICT DO NOTHING;
 insert into drugs_available(id,drug_name, approval, price) values (8, 'Lexapro', TRUE, 150.00) ON CONFLICT DO NOTHING;
-insert into drugs_available(id,drug_name, price) values (9, 'insulin', 60.00) ON CONFLICT DO NOTHING;
-insert into drugs_available(id,drug_name, price) values (10, 'adapelene', 60.00) ON CONFLICT DO NOTHING;
-
-
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 1, 'paracetamol', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 1, 'paracetamol', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 7, 'Adderall', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 7, 'Adderall', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 6, 'bismuth subsalicylate', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 6, 'bismuth subsalicylate', 1000) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (9, 'Amoxicillin', 60.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (10, 'Valium', 60.00) ON CONFLICT DO NOTHING;
 
 insert into drugs_available(id,drug_name, price) values (11, 'Lyrica', 250.00) ON CONFLICT DO NOTHING;
 insert into drugs_available(id,drug_name, price) values (12, 'Melatonin', 250.00) ON CONFLICT DO NOTHING;
@@ -319,47 +314,64 @@ insert into drugs_available(id,drug_name, price) values (24, 'Opdivo', 250.00) O
 insert into drugs_available(id,drug_name, price) values (25, 'Otezla', 250.00) ON CONFLICT DO NOTHING;
 insert into drugs_available(id,drug_name, price) values (26, 'Ozempic', 250.00) ON CONFLICT DO NOTHING;
 insert into drugs_available(id,drug_name, price) values (27, 'Pantoprazole', 250.00) ON CONFLICT DO NOTHING;
-insert into drugs_available(id,drug_name, price) values (28, 'Plan', 250.00) ON CONFLICT DO NOTHING;
-insert into drugs_available(id,drug_name, price) values (29, 'B', 250.00) ON CONFLICT DO NOTHING;
-insert into drugs_available(id,drug_name, price) values (30, 'Prednisone', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (28, 'PlanB', 250.00) ON CONFLICT DO NOTHING;
+insert into drugs_available(id,drug_name, price) values (29, 'Prednisone', 250.00) ON CONFLICT DO NOTHING;
 
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 11, 'Lyrica', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 11, 'Lyrica', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 12, 'Melatonin', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 12, 'Melatonin', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 13, 'Meloxicam', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 13, 'Meloxicam', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 14, 'Metformin', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 14, 'Metformin', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 15, 'Methadone', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 15, 'Methadone', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 16, 'Methotrexate', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 16, 'Methotrexate', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 17, 'Metoprolol', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 17, 'Metoprolol', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 18, 'Mounjaro', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 18, 'Mounjaro', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 19, 'Naltrexone', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 19, 'Naltrexone', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 20, 'Naproxen', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 20, 'Naproxen', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 21, 'Narcan', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 21, 'Narcan', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 22, 'Nurtec', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 22, 'Nurtec', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 23, 'Omeprazole', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 23, 'Omeprazole', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 24, 'Opdivo', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 24, 'Opdivo', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 25, 'Otezla', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 25, 'Otezla', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 26, 'Ozempic', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 26, 'Ozempic', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 27, 'Pantoprazole', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 27, 'Pantoprazole', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 28, 'Plan', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 28, 'Plan', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 29, 'B', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 29, 'B', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (1, 30, 'Prednisone', 1000) ON CONFLICT DO NOTHING;
-insert into stock(branch_id,drug_id, drug_name, amount) values (2, 30, 'Prednisone', 1000) ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 1, 'paracetamol', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 1, 'paracetamol', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 2, 'fentanyl', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 2, 'fentanyl', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 3, 'acetaminophen', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 3, 'acetaminophen', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 4, 'insulin', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 4, 'insulin', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 5, 'adapelene', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 5, 'adapelene', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 6, 'bismuth-subsalicylate', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 6, 'bismuth-subsalicylate', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 7, 'Adderall', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 7, 'Adderall', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 8, 'Lexapro', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 8, 'Lexapro', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 9, 'Amoxicillin', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 9, 'Amoxicillin', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 10, 'Valium', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 10, 'Valium', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 11, 'Lyrica', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 11, 'Lyrica', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 12, 'Melatonin', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 12, 'Melatonin', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 13, 'Meloxicam', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 13, 'Meloxicam', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 14, 'Metformin', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 14, 'Metformin', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 15, 'Methadone', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 15, 'Methadone', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 16, 'Methotrexate', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 16, 'Methotrexate', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 17, 'Metoprolol', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 17, 'Metoprolol', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 18, 'Mounjaro', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 18, 'Mounjaro', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 19, 'Naltrexone', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 19, 'Naltrexone', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 20, 'Naproxen', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 20, 'Naproxen', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 21, 'Narcan', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 21, 'Narcan', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 22, 'Nurtec', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 22, 'Nurtec', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 23, 'Omeprazole', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 23, 'Omeprazole', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 24, 'Opdivo', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 24, 'Opdivo', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 25, 'Otezla', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 25, 'Otezla', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 26, 'Ozempic', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 26, 'Ozempic', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 27, 'Pantoprazole', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 27, 'Pantoprazole', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 28, 'PlanB', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 28, 'PlanB', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 29, 'Prednisone', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
+insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 29, 'Prednisone', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
