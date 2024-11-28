@@ -1,15 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login page in HTML</title>
-</head>
-<body>
-    <h1>Login form using HTML and CSS</h1>
-    <form action="" method="post">
-        <label for="title">Log your shift</label>
+
+<section class="vh-100" style="background-color: #508bfc;">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card shadow-2-strong" style="border-radius: 1rem;">
+          <div class="card-body p-5 text-center">
+
+            <h3 class="mb-5">Sign in to your shift</h3>
+
+            <div data-mdb-input-init class="form-outline mb-4">
+             <form action="" method="post">
         <br>
         <input type="text" name="id"
                placeholder="Enter work id"
@@ -20,6 +20,19 @@
                placeholder="Enter your name"
                value="{{ request.form.name}}"></input>
         <br>
-    <button type=”submit”> Submit </button>
+    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block" type=”submit”> Start Shift </button>
 </form>
-</body>
+
+            <hr class="my-4">
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+ <body>
+      {% for mesg in get_flashed_messages() %}
+      <h1>{{ mesg }}</h1>
+      {% endfor %}
+    </body>
