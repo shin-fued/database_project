@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS shift(
 );
 
 create table if not exists stock_order(
-                                          order_id int not null unique ,
+                                          order_id int unique generated always as identity,
                                           drug_id int not null,
                                           constraint fk_drug
                                               foreign key(drug_id)
@@ -215,6 +215,26 @@ CREATE TRIGGER employee_log_trigger
 EXECUTE FUNCTION log_employee_changes();
 -- end of log table features
 
+
+-- make order
+CREATE OR REPLACE FUNCTION make_order(
+    drug INT,
+    amount_d INT) RETURNS TEXT AS $$
+BEGIN
+    INSERT INTO stock_order(drug_id, amount, order_placed, expiration_date, time) values($1, $2, TRUE, ((timestamp '2024-01-01' +
+                                                                                             random() * (timestamp '2040-12-31' -
+                                                                                                                     timestamp '2024-01-01'))), (select NOW() + (random() * (NOW()+'10 days' - NOW())) + '3 days'));
+    RETURN 'order placed';
+END;
+$$ LANGUAGE plpgsql;
+
+
+--return all expired drugs
+CREATE OR REPLACE FUNCTION expired() returns table(d_id INT, d_name varchar(40), am INT) as $$
+BEGIN
+return query SELECT drug_id, drug_name, amount FROM stock where expiration_date <= current_date;
+END
+    $$ LANGUAGE plpgsql;
 
 -- purchase function
 CREATE OR REPLACE FUNCTION make_purchase(
