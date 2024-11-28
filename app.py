@@ -28,11 +28,12 @@ def shift():
     if request.method == 'POST':
         id = request.form['id']
         name = request.form['name']
-        cur.execute("SELECT employee_name FROM employee WHERE id = {0}".format(id))
+        cur.execute(f"SELECT employee_name FROM employee WHERE id = {id} limit 1")
+        print(cur.fetchone())
         if not id:
             flash('ID is required!')
             return redirect(url_for('shift'))
-        if cur.fetchone()[0]==name:
+        if cur.fetchone() is None or cur.fetchone()[0] == name:
             flash('You\'re not an employee')
             return redirect(url_for('shift'))
         else:
