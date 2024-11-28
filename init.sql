@@ -96,6 +96,119 @@ CREATE TABLE IF NOT EXISTS transactions(
                                             primary key (purchaser, drug_id, branch_id)
 );
 
+
+CREATE TABLE IF NOT EXISTS drugs_available_log (
+    log_id SERIAL PRIMARY KEY,
+    action_type VARCHAR(10) NOT NULL, -- 'INSERT', 'UPDATE', or 'DELETE'
+    log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id INT,
+    drug_name VARCHAR(40),
+    price FLOAT,
+    approval BOOLEAN
+);
+CREATE TABLE IF NOT EXISTS branches_log (
+    log_id SERIAL PRIMARY KEY,
+    action_type VARCHAR(10) NOT NULL,
+    log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id INT,
+    branch_name VARCHAR(40),
+    location VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS employee_log (
+    log_id SERIAL PRIMARY KEY,
+    action_type VARCHAR(10) NOT NULL,
+    log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id INT,
+    employee_name VARCHAR(255),
+    employee_salary INT,
+    type_employee employee_type,
+    branch_id INT
+);
+
+
+CREATE OR REPLACE FUNCTION log_drugs_available_changes()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO drugs_available_log(action_type, id, drug_name, price, approval)
+        VALUES ('INSERT', NEW.id, NEW.drug_name, NEW.price, NEW.approval);
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO drugs_available_log(action_type, id, drug_name, price, approval)
+        VALUES ('UPDATE', OLD.id, OLD.drug_name, OLD.price, OLD.approval);
+    ELSIF (TG_OP = 'DELETE') THEN
+        INSERT INTO drugs_available_log(action_type, id, drug_name, price, approval)
+        VALUES ('DELETE', OLD.id, OLD.drug_name, OLD.price, OLD.approval);
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION log_branches_changes()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO branches_log(action_type, id, branch_name, location)
+        VALUES ('INSERT', NEW.id, NEW.branch_name, NEW.location);
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO branches_log(action_type, id, branch_name, location)
+        VALUES ('UPDATE', OLD.id, OLD.branch_name, OLD.location);
+    ELSIF (TG_OP = 'DELETE') THEN
+        INSERT INTO branches_log(action_type, id, branch_name, location)
+        VALUES ('DELETE', OLD.id, OLD.branch_name, OLD.location);
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION log_employee_changes()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO employee_log (
+            action_type, id, employee_name, employee_salary, type_employee, branch_id
+        )
+        VALUES (
+            'INSERT', NEW.id, NEW.employee_name, NEW.employee_salary, NEW.type_employee, NEW.branch_id
+        );
+
+    ELSIF TG_OP = 'UPDATE' THEN
+        INSERT INTO employee_log (
+            action_type, id, employee_name, employee_salary, type_employee, branch_id
+        )
+        VALUES (
+            'UPDATE', NEW.id, NEW.employee_name, NEW.employee_salary, NEW.type_employee, NEW.branch_id
+        );
+
+    ELSIF TG_OP = 'DELETE' THEN
+        INSERT INTO employee_log (
+            action_type, id, employee_name, employee_salary, type_employee, branch_id
+        )
+        VALUES (
+            'DELETE', OLD.id, OLD.employee_name, OLD.employee_salary, OLD.type_employee, OLD.branch_id
+        );
+    END IF;
+
+    RETURN NULL; -- Ensures the original operation is unaffected
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_drugs_available_changes
+AFTER INSERT OR UPDATE OR DELETE ON drugs_available
+FOR EACH ROW
+EXECUTE FUNCTION log_drugs_available_changes();
+
+CREATE TRIGGER trg_branches_changes
+AFTER INSERT OR UPDATE OR DELETE ON branches
+FOR EACH ROW
+EXECUTE FUNCTION log_branches_changes();
+CREATE TRIGGER employee_log_trigger
+AFTER INSERT OR UPDATE OR DELETE ON employee
+FOR EACH ROW
+EXECUTE FUNCTION log_employee_changes();
+
+
+
 insert into branches(id, branch_name, location) values (1, 'salaya', 'salaya thailand') ON CONFLICT DO NOTHING;
 insert into branches(id, branch_name, location) values (2, 'bangkok', 'bangkok thailand') ON CONFLICT DO NOTHING;
 
