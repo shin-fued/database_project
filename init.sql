@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS transactions(
                                             constraint fk_employee
                                                 foreign key(employee_id)
                                                     references employee(id),
+                                            quantity INT not null,
                                             price numeric(2) not null,
                                             time timestamp not null,
                                             branch_id int,
@@ -97,6 +98,8 @@ CREATE TABLE IF NOT EXISTS transactions(
 );
 
 
+
+-- make log table
 CREATE TABLE IF NOT EXISTS drugs_available_log (
     log_id SERIAL PRIMARY KEY,
     action_type VARCHAR(10) NOT NULL, -- 'INSERT', 'UPDATE', or 'DELETE'
@@ -206,6 +209,57 @@ CREATE TRIGGER employee_log_trigger
 AFTER INSERT OR UPDATE OR DELETE ON employee
 FOR EACH ROW
 EXECUTE FUNCTION log_employee_changes();
+-- end of log table features
+
+
+-- purchase function
+CREATE OR REPLACE FUNCTION make_purchase(
+    customer_name VARCHAR(255),
+    p_drug_id INT,
+    employee_id INT,
+    p_branch_id INT,
+    quantity INT
+)
+RETURNS TEXT AS $$
+DECLARE
+    current_stock INT;
+    drug_price FLOAT;
+    drug_name VARCHAR(255);
+BEGIN
+    -- Check if the drug exists and fetch its details
+    SELECT amount, price, drugs_available.drug_name
+    INTO current_stock, drug_price, drug_name
+    FROM stock
+    JOIN drugs_available ON stock.drug_id = drugs_available.id
+    WHERE stock.drug_id = p_drug_id AND stock.branch_id = p_drug_id;
+
+    IF NOT FOUND THEN
+        RETURN 'Error: Drug not found in this branch.';
+    END IF;
+
+    -- Check if sufficient stock is available
+    IF current_stock < quantity THEN
+        RETURN 'Error: Insufficient stock available.';
+    END IF;
+
+    -- Deduct the quantity from the stock
+    UPDATE stock
+    SET amount = amount - quantity
+    WHERE drug_id = $2 AND branch_id = $4;
+
+    -- Insert the transaction record
+    INSERT INTO transactions (
+        purchaser, drug_name, drug_id, employee_id, quantity,price, time, branch_id
+    )
+    VALUES (
+        $1, drug_name, $2, $3, $5,drug_price * $5, CURRENT_TIMESTAMP, $4
+    );
+
+    -- Return a success message
+    RETURN FORMAT('Purchase successful! %s x%d bought for $%.2f', drug_name, quantity, drug_price * quantity);
+END;
+$$ LANGUAGE plpgsql;
+
 
 
 
