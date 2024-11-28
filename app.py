@@ -28,12 +28,11 @@ def shift():
     if request.method == 'POST':
         id = request.form['id']
         name = request.form['name']
-        cur.execute("SELECT employee_name FROM employee WHERE id = {id}".format(id=id))
-        e_name = cur.fetchone()[0]
+        e_name = cur.execute("SELECT employee_name FROM employee WHERE id = {0}".format(id))
         if not id:
             flash('ID is required!')
             return redirect(url_for('shift'))
-        if name!=e_name:
+        if e_name==name:
             flash('You\'re not an employee')
             return redirect(url_for('shift'))
         else:
@@ -60,7 +59,7 @@ def profile(username):
 with app.test_request_context():
     print(url_for('index'))
     print(url_for('shift'))
-    print(url_for('login', next='/'))
+    print(url_for('transactions', next='/'))
 
 if __name__ == '__main__':
     app.run(debug=True)
