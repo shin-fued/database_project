@@ -51,7 +51,7 @@ def shift():
 
 @app.route('/transactions/')
 def transactions():
-    
+
     return render_template('transactions.html')
 
 @app.route('/user/<username>')
