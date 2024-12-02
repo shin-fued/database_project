@@ -54,6 +54,23 @@ def transactions():
 
     return render_template('transactions.html')
 
+
+@app.route('/expired_drugs/<int:branch_id>', methods=['GET'])
+def expired_drugs(branch_id):
+    """
+    Fetch and display all expired drugs for a specific branch.
+    """
+    try:
+        # Call the SQL function to get expired drugs
+        cur.execute("SELECT * FROM expired(%s)", (branch_id,))
+        expired_drugs = cur.fetchall()
+
+        # Render results in a template
+        return render_template('expired_drugs.html', expired_drugs=expired_drugs, branch_id=branch_id)
+    except Exception as e:
+        flash(f"Error retrieving expired drugs: {e}", "error")
+        return redirect(url_for('index'))
+
 @app.route('/user/<username>')
 def profile(username):
     return f'{username}\'s profile'
