@@ -405,3 +405,35 @@ insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values 
 insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (1, 29, 'Prednisone', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
 insert into stock(branch_id,drug_id, drug_name, amount, expiration_date) values (2, 29, 'Prednisone', 1000, '2030-01-01') ON CONFLICT DO NOTHING;
 
+
+
+CREATE OR REPLACE FUNCTION add_stock(
+    p_drug_id INT,
+    p_branch_id INT,
+    p_amount INT,
+    p_expiration_date DATE
+) RETURNS TEXT AS $$
+DECLARE
+    current_amount INT;
+BEGIN
+    -- Check if the stock entry already exists for the drug and branch
+    SELECT amount INTO current_amount
+    FROM stock
+    WHERE drug_id = p_drug_id AND branch_id = p_branch_id;
+
+    IF FOUND THEN
+        -- If the stock already exists, update the amount
+        UPDATE stock
+        SET amount = amount + p_amount, expiration_date = p_expiration_date
+        WHERE drug_id = p_drug_id AND branch_id = p_branch_id;
+        RETURN format('Stock updated: Added %d units to existing stock of Drug ID %d at Branch %d.', p_amount, p_drug_id, p_branch_id);
+    ELSE
+        -- Otherwise, insert a new stock entry
+        INSERT INTO stock (branch_id, drug_id, drug_name, amount, expiration_date)
+        SELECT p_branch_id, p_drug_id, drug_name, p_amount, p_expiration_date
+        FROM drugs
+        WHERE id = p_drug_id;
+        RETURN format('New stock added: %d units of Drug ID %d at Branch %d.', p_amount, p_drug_id, p_branch_id);
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
