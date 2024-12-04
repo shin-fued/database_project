@@ -90,7 +90,7 @@ CREATE OR REPLACE FUNCTION make_order(
 BEGIN
     INSERT INTO stock_order(drug_id, amount, order_placed, expiration_date, time, branch_id) values($1, $2, TRUE, ((timestamp '2024-01-01' +
                                                                                              random() * (timestamp '2040-12-31' -
-                                                                                                                     timestamp '2024-01-01'))), (select NOW() + (random() * (NOW()+'10 days' - NOW())) + '3 days'), $3);
+                                                                                                                timestamp '2024-01-01'))), (select NOW() + (random() * (NOW()+'10 days' - NOW())) + '3 days'), $3);
     RETURN 'order placed';
 END;
 $$ LANGUAGE plpgsql;
@@ -172,35 +172,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT make_purchase('Tath', 1, 10, 1, 10);
-
 CREATE OR REPLACE FUNCTION add_stock(
     p_drug_id INT,
     p_branch_id INT,
-    p_amount INT,
-    p_expiration_date DATE
-) RETURNS TEXT AS $$
+    p_amount INT
+) RETURNS TRIGGER AS $$
 DECLARE
     current_amount INT;
 BEGIN
-    -- Check if the stock entry already exists for the drug and branch
-    SELECT amount INTO current_amount
-    FROM stock
-    WHERE drug_id = p_drug_id AND branch_id = p_branch_id;
-
-    IF FOUND THEN
-        -- If the stock already exists, update the amount
-        UPDATE stock
-        SET amount = amount + p_amount, expiration_date = p_expiration_date
-        WHERE drug_id = p_drug_id AND branch_id = p_branch_id;
-        RETURN format('Stock updated: Added %d units to existing stock of Drug ID %d at Branch %d.', p_amount, p_drug_id, p_branch_id);
-    ELSE
-        -- Otherwise, insert a new stock entry
-        INSERT INTO stock (branch_id, drug_id, brand_name, amount, expiration_date)
-        SELECT p_branch_id, p_drug_id, brand_name, p_amount, p_expiration_date
-        FROM drugs
-        WHERE id = p_drug_id;
-        RETURN format('New stock added: %d units of Drug ID %d at Branch %d.', p_amount, p_drug_id, p_branch_id);
-    END IF;
+    SELECT
 END;
 $$ LANGUAGE plpgsql;
