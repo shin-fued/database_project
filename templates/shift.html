@@ -1,38 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Stock - Drug Store</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
 
-<section class="vh-100" style="background-color: #508bfc;">
-  <div class="container py-5 h-100">
-    <div class="row d-flex justify-content-center align-items-center h-100">
-      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-        <div class="card shadow-2-strong" style="border-radius: 1rem;">
-          <div class="card-body p-5 text-center">
+        .container {
+            max-width: 900px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 50px;
+        }
 
-            <h3 class="mb-5">Sign in to your shift</h3>
+        h2 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
 
-            <div data-mdb-input-init class="form-outline mb-4">
-             <form action="" method="post">
-        <br>
-        <input type="text" name="id"
-               placeholder="Enter work id"
-               value="{{ request.form.id}}"></input>
-        <br>
-        <br>
-        <input type="text" name="name"
-               placeholder="Enter your name"
-               value="{{ request.form.name}}"></input>
-        <br>
-    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block" type=”submit”> Start Shift </button>
-</form>
+        .form-table th {
+            width: 40%;
+            background-color: #f1f1f1;
+            padding: 12px;
+        }
 
-            <hr class="my-4">
+        .form-table td {
+            padding: 12px;
+        }
 
-          </div>
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .btn {
+            border-radius: 30px;
+            padding: 12px 30px;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .alert {
+            margin-top: 30px;
+        }
+
+        .alert-info {
+            border-left: 4px solid #007bff;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #888;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>START SHIFT NOW</h2>
+
+        <!-- Form Table -->
+        <form action="" method="POST">
+            <table class="table table-bordered form-table">
+                 <tr>
+                    <th for="employee_id">EMPLOYEE ID</th>
+                    <td><input type="number" class="form-control" id="employee_id" name="employee_id" required></td>
+                </tr>
+                <tr>
+                    <th for="employee_name">Drug ID</th>
+                    <td><input type="text" class="form-control" id="employee_name" name="employee_name" required></td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="text-center">
+                        <button type="submit" class="btn btn-primary">LOCK IN</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        <!-- Display Result Message -->
+        {% if message %}
+        <div class="alert alert-info">
+            {{ message }}
         </div>
-      </div>
+        {% endif %}
     </div>
-  </div>
-</section>
- <body>
-      {% for mesg in get_flashed_messages() %}
-      <h1>{{ mesg }}</h1>
-      {% endfor %}
-    </body>
+
+    <div class="footer">
+        <p>Need help? <a href="#">Contact Support</a></p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>

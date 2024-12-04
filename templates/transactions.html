@@ -2,9 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Stock - Drug Store</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 900px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 50px;
+        }
+
+        h2 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-table th {
+            width: 40%;
+            background-color: #f1f1f1;
+            padding: 12px;
+        }
+
+        .form-table td {
+            padding: 12px;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        .btn {
+            border-radius: 30px;
+            padding: 12px 30px;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .alert {
+            margin-top: 30px;
+        }
+
+        .alert-info {
+            border-left: 4px solid #007bff;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #888;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h2>BUY MEDICINE NOW</h2>
 
+        <!-- Form Table -->
+        <form action="" method="POST">
+            <table class="table table-bordered form-table">
+                <tr>
+                    <th for="customer">customer</th>
+                    <td><input type="text" class="form-control" id="customer" name="customer" required></td>
+                </tr>
+                 <tr>
+                    <th for="employee_id">EMPLOYEE ID</th>
+                    <td><input type="number" class="form-control" id="employee_id" name="employee_id" required></td>
+                </tr>
+                <tr>
+                    <th for="drug_id">Drug ID</th>
+                    <td><input type="number" class="form-control" id="drug_id" name="drug_id" required></td>
+                </tr>
+                <tr>
+                    <th for="branch_id">BRANCH ID</th>
+                    <td><input type="number" class="form-control" id="branch_id" name="drug_id" required></td>
+                </tr>
+                <tr>
+                    <th for="amount">Amount</th>
+                    <td><input type="number" class="form-control" id="amount" name="amount" required></td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="text-center">
+                        <button type="submit" class="btn btn-primary">Make Purchase</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+        <!-- Display Result Message -->
+        {% if message %}
+        <div class="alert alert-info">
+            {{ message }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <p>Need help? <a href="#">Contact Support</a></p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 </body>
 </html>

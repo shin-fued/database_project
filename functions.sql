@@ -172,104 +172,54 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION add_stock(
-    p_drug_id INT,
-    p_branch_id INT,
-    p_amount INT
+CREATE OR REPLACE FUNCTION add_stock_from_order(
 ) RETURNS TRIGGER AS $$
-DECLARE
-    current_amount INT;
+    DECLARE
+        brand stock.brand_name%type;
 BEGIN
-    SELECT
+        select brand_name into brand from drugs where id=new.drug_id;
+    insert into stock(branch_id, drug_id, brand_name, amount, expiration_date, order_id) values(NEW.branch_id, new.drug_id, brand, new.amount, new.expiration_date, new.order_id);
+        RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
-
+CREATE OR REPLACE TRIGGER trg_add_stock_from_order
+    AFTER INSERT ON stock_order
+    FOR EACH ROW
+EXECUTE FUNCTION add_stock_from_order();
 
 -- the function for testing //
--- CREATE OR REPLACE FUNCTION add_stock(
---     p_drug_id INT,
---     p_branch_id INT,
---     p_amount INT,
---     p_expiration_date DATE
--- ) RETURNS TEXT AS $$
--- DECLARE
---     current_amount INT;
--- BEGIN
---     -- Check if the stock entry already exists for the drug and branch
---     SELECT amount INTO current_amount
---     FROM stock
---     WHERE drug_id = p_drug_id AND branch_id = p_branch_id;
---
---     IF FOUND THEN
---         -- If the stock already exists, update the amount
---         UPDATE stock
---         SET amount = amount + p_amount, expiration_date = p_expiration_date
---         WHERE drug_id = p_drug_id AND branch_id = p_branch_id;
---         RETURN format('Stock updated: Added %d units to existing stock of Drug ID %d at Branch %d.', p_amount, p_drug_id, p_branch_id);
---     ELSE
---         -- Otherwise, insert a new stock entry
---         INSERT INTO stock (branch_id, drug_id, drug_name, amount, expiration_date)
---         SELECT p_branch_id, p_drug_id, drug_name, p_amount, p_expiration_date
---         FROM drugs
---         WHERE id = p_drug_id;
---         RETURN format('New stock added: %d units of Drug ID %d at Branch %d.', p_amount, p_drug_id, p_branch_id);
---     END IF;
--- END;
--- $$ LANGUAGE plpgsql;
---
--- CREATE SEQUENCE transactions_id_seq START 1;
--- ALTER TABLE transactions ALTER COLUMN id SET DEFAULT nextval('transactions_id_seq');
---
--- ALTER TABLE transactions ALTER COLUMN id SET DEFAULT nextval('transactions_id_seq');
---
--- CREATE OR REPLACE FUNCTION make_purchase(
---     customer_name VARCHAR(255),
---     p_drug_id INT,
---     employee_id INT,
---     p_branch_id INT,
---     quantity INT
--- )
---     RETURNS TEXT AS $$
--- DECLARE
---     current_stock INT;
---     drug_price FLOAT;
---     drug_name VARCHAR(255);
--- BEGIN
---     -- Check if the drug exists and fetch its details
---     SELECT amount, price, drugs.drug_name
---     INTO current_stock, drug_price, drug_name
---     FROM stock
---              JOIN drugs ON stock.drug_id = drugs.id
---     WHERE stock.drug_id = p_drug_id AND stock.branch_id = p_branch_id;
---
---     IF NOT FOUND THEN
---         RETURN 'Error: Drug not found in this branch.';
---     END IF;
---
---     -- Check if sufficient stock is available
---     IF current_stock < quantity THEN
---         RETURN 'Error: Insufficient stock available.';
---     END IF;
---
---     -- Deduct the quantity from the stock
---     UPDATE stock
---     SET amount = amount - quantity
---     WHERE drug_id = p_drug_id AND branch_id = p_branch_id;
---
---     -- Insert the transaction record (relying on auto-increment for id)
---     INSERT INTO transactions (
---         purchaser, drug_name, drug_id, employee_id, quantity, price, time, branch_id
---     )
---     VALUES (
---         customer_name, drug_name, p_drug_id, employee_id, quantity, drug_price * quantity, CURRENT_TIMESTAMP, p_branch_id
---     );
---
---     -- Return a success message
---     RETURN FORMAT(
---         'Purchase successful! %s x%s bought for $%s',
---         drug_name, quantity, drug_price * quantity, 2)
---     ;
--- END;
--- $$ LANGUAGE plpgsql;
--- ALTER TABLE transactions ALTER COLUMN price TYPE NUMERIC(10, 2);
+CREATE OR REPLACE FUNCTION add_stock(
+    p_drug_id INT,
+    brand VARCHAR(255),
+    p_branch_id INT,
+    p_amount INT,
+    p_expiration_date DATE
+) RETURNS TEXT AS $$
+DECLARE
+    check_id INT;
+    new_order_id INT;
+BEGIN
+    -- Validate the drug ID and brand
+    SELECT id INTO check_id
+    FROM drugs
+    WHERE id = p_drug_id AND brand_name = brand;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Invalid drug ID or brand name: % and %', p_drug_id, brand;
+    END IF;
+
+    -- Insert into stock_order
+    INSERT INTO stock_order (drug_id, amount, time, order_placed, expiration_date, branch_id)
+    VALUES (p_drug_id, p_amount, NOW(), TRUE, p_expiration_date, p_branch_id)
+    RETURNING order_id INTO new_order_id;
+
+    -- Insert into stock
+    INSERT INTO stock (branch_id, drug_id, brand_name, amount, expiration_date, order_id)
+    VALUES (p_branch_id, p_drug_id, brand, p_amount, p_expiration_date, new_order_id);
+
+    -- Return success message
+    RETURN FORMAT('Stock added successfully for Drug ID: %s, Branch ID: %s, Amount: %s.', p_drug_id, p_branch_id, p_amount);
+END;
+$$ LANGUAGE plpgsql;
+

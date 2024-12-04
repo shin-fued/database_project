@@ -49,7 +49,7 @@ def shift():
     return render_template('shift.html')
 
 
-@app.route('/transactions/')
+@app.route('/transactions/', methods=['POST'])
 def transactions():
 
     return render_template('transactions.html')
@@ -71,20 +71,6 @@ def expired_drugs(branch_id):
         flash(f"Error retrieving expired drugs: {e}", "error")
         return redirect(url_for('index'))
 
-
-@app.route('/expired_drugs/<int:branch_id>', methods=['GET'])
-def expired_drugs(branch_id):
-    """
-    Fetch and display all expired drugs for a specific branch.
-    """
-    try:
-        cur.execute("SELECT * FROM expired(%s)", (branch_id,))
-        expired_drugs = cur.fetchall()
-
-        return render_template('expired_drugs.html', expired_drugs=expired_drugs, branch_id=branch_id)
-    except Exception as e:
-        flash(f"Error retrieving expired drugs: {e}", "error")
-        return redirect(url_for('index'))
 
 @app.route('/api/search_drug', methods=['GET'])
 def search_drug():
@@ -183,12 +169,12 @@ def signout():
 
 
 
-@app.route('/home/<int:branch_id>')
-def home(branch_id):
-    cur.execute("SELECT drug_name, amount, expiration_date FROM stock WHERE branch_id = %s;", (branch_id,))
-    stock = cur.fetchall()
-
-    return render_template('home.html', branch_id=branch_id, stock=stock)
+# @app.route('/home/<int:branch_id>')
+# def home(branch_id):
+#     cur.execute("SELECT drug_name, amount, expiration_date FROM stock WHERE branch_id = %s;", (branch_id,))
+#     stock = cur.fetchall()
+#
+#     return render_template('home.html', branch_id=branch_id, stock=stock)
 
 
 @app.route('/user/<username>')
