@@ -1,0 +1,605 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Employee Dashboard - Drug Store</title>-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <style>-->
+<!--        body {-->
+<!--            background-color: #f8f9fa;-->
+<!--            font-family: Arial, sans-serif;-->
+<!--        }-->
+
+<!--        .container {-->
+<!--            max-width: 900px;-->
+<!--            background-color: white;-->
+<!--            padding: 30px;-->
+<!--            border-radius: 8px;-->
+<!--            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);-->
+<!--            margin-top: 50px;-->
+<!--        }-->
+
+<!--        h2 {-->
+<!--            color: #007bff;-->
+<!--            text-align: center;-->
+<!--            margin-bottom: 30px;-->
+<!--        }-->
+
+<!--        .btn {-->
+<!--            width: 100%;-->
+<!--            margin: 10px 0;-->
+<!--            border-radius: 30px;-->
+<!--            padding: 15px;-->
+<!--            font-size: 16px;-->
+<!--        }-->
+
+<!--        .btn-primary {-->
+<!--            background-color: #007bff;-->
+<!--            border: none;-->
+<!--        }-->
+
+<!--        .btn-primary:hover {-->
+<!--            background-color: #0056b3;-->
+<!--        }-->
+
+<!--        .btn-danger {-->
+<!--            background-color: #dc3545;-->
+<!--            border: none;-->
+<!--        }-->
+
+<!--        .btn-danger:hover {-->
+<!--            background-color: #c82333;-->
+<!--        }-->
+
+<!--        .footer {-->
+<!--            text-align: center;-->
+<!--            margin-top: 50px;-->
+<!--            color: #888;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--    <div class="container">-->
+<!--        <h2>Welcome, Employee</h2>-->
+
+<!--        <form action="/signout" method="POST">-->
+<!--            <button type="submit" class="btn btn-danger">Sign Out</button>-->
+<!--        </form>-->
+
+<!--        <form action="/purchase" method="GET">-->
+<!--            <button type="submit" class="btn btn-primary">Purchase</button>-->
+<!--        </form>-->
+
+<!--        <form action="/add_stock" method="GET">-->
+<!--            <button type="submit" class="btn btn-primary">Add Stock</button>-->
+<!--        </form>-->
+
+<!--        <form action="/check_stock" method="GET">-->
+<!--            <button type="submit" class="btn btn-primary">Check Stock</button>-->
+<!--        </form>-->
+<!--    </div>-->
+
+<!--    <div class="footer">-->
+<!--        <p>Need help? <a href="#">Contact Support</a></p>-->
+<!--    </div>-->
+
+<!--    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/js/bootstrap.min.js"></script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Home - Drug Store</title>-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: 'Arial', sans-serif;-->
+<!--            background: #f8f9fa;-->
+<!--        }-->
+
+<!--        .sidebar {-->
+<!--            height: 100vh;-->
+<!--            position: fixed;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            width: 250px;-->
+<!--            background-color: #007bff;-->
+<!--            padding-top: 20px;-->
+<!--            padding-left: 20px;-->
+<!--            color: white;-->
+<!--            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+
+<!--        .sidebar h4 {-->
+<!--            color: #fff;-->
+<!--            margin-bottom: 40px;-->
+<!--        }-->
+
+<!--        .sidebar a {-->
+<!--            color: white;-->
+<!--            font-size: 18px;-->
+<!--            margin-bottom: 15px;-->
+<!--            text-decoration: none;-->
+<!--            display: block;-->
+<!--        }-->
+
+<!--        .sidebar a:hover {-->
+<!--            background-color: #0056b3;-->
+<!--            padding-left: 10px;-->
+<!--        }-->
+
+<!--        .content {-->
+<!--            margin-left: 270px;-->
+<!--            padding: 30px;-->
+<!--        }-->
+
+<!--        .card {-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+
+<!--        .card-header {-->
+<!--            font-size: 20px;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+
+<!--        table th, table td {-->
+<!--            text-align: center;-->
+<!--            padding: 10px;-->
+<!--        }-->
+
+<!--        .btn-primary {-->
+<!--            width: 100%;-->
+<!--            padding: 12px;-->
+<!--            font-size: 16px;-->
+<!--            background-color: #007bff;-->
+<!--            border: none;-->
+<!--            color: #fff;-->
+<!--            border-radius: 5px;-->
+<!--        }-->
+
+<!--        .btn-primary:hover {-->
+<!--            background-color: #0056b3;-->
+<!--        }-->
+
+<!--        .header-title {-->
+<!--            font-size: 30px;-->
+<!--            font-weight: bold;-->
+<!--            margin-bottom: 20px;-->
+<!--            color: #333;-->
+<!--        }-->
+
+<!--        @media (max-width: 768px) {-->
+<!--            .sidebar {-->
+<!--                width: 200px;-->
+<!--            }-->
+
+<!--            .content {-->
+<!--                margin-left: 220px;-->
+<!--            }-->
+<!--        }-->
+
+<!--        @media (max-width: 576px) {-->
+<!--            .sidebar {-->
+<!--                width: 100%;-->
+<!--                height: auto;-->
+<!--                position: relative;-->
+<!--            }-->
+
+<!--            .content {-->
+<!--                margin-left: 0;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--    &lt;!&ndash; Sidebar &ndash;&gt;-->
+<!--    <div class="sidebar">-->
+<!--        <h4>Employee Dashboard</h4>-->
+
+<!--        <a href="google.com">Purchase</a>-->
+<!--        <a href="google.com">Add Stock</a>-->
+<!--        <a href="google.com">Check Expired Drugs</a>-->
+<!--        <a href="/logout">Sign Out</a>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Main Content &ndash;&gt;-->
+<!--    <div class="content">-->
+<!--        <div class="header-title">Stock List for Branch {{ branch_id }}</div>-->
+
+<!--        <div class="card">-->
+<!--            <div class="card-header">-->
+<!--                Available Drugs in Stock-->
+<!--            </div>-->
+<!--            <div class="card-body">-->
+<!--                <table class="table table-bordered table-striped">-->
+<!--                    <thead>-->
+<!--                        <tr>-->
+<!--                            <th>Drug Name</th>-->
+<!--                            <th>Quantity</th>-->
+<!--                            <th>Expiration Date</th>-->
+<!--                        </tr>-->
+<!--                    </thead>-->
+<!--                    <tbody>-->
+<!--                        {% if stock %}-->
+<!--                            {% for drug in stock %}-->
+<!--                                <tr>-->
+<!--                                    <td>{{ drug.drug_name }}</td>-->
+<!--                                    <td>{{ drug.amount }}</td>-->
+<!--                                    <td>{{ drug.expiration_date }}</td>-->
+<!--                                </tr>-->
+<!--                            {% endfor %}-->
+<!--                        {% else %}-->
+<!--                            <tr>-->
+<!--                                <td colspan="3">No drugs available in this branch.</td>-->
+<!--                            </tr>-->
+<!--                        {% endif %}-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--    </div>-->
+
+<!--    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/js/bootstrap.min.js"></script>-->
+
+<!--</body>-->
+<!--</html>-->
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Home - Drug Store</title>-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: 'Arial', sans-serif;-->
+<!--            background: #f8f9fa;-->
+<!--        }-->
+
+<!--        .sidebar {-->
+<!--            height: 100vh;-->
+<!--            position: fixed;-->
+<!--            top: 0;-->
+<!--            left: 0;-->
+<!--            width: 250px;-->
+<!--            background-color: #007bff;-->
+<!--            padding-top: 20px;-->
+<!--            padding-left: 20px;-->
+<!--            color: white;-->
+<!--            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+
+<!--        .sidebar h4 {-->
+<!--            color: #fff;-->
+<!--            margin-bottom: 40px;-->
+<!--        }-->
+
+<!--        .sidebar a {-->
+<!--            color: white;-->
+<!--            font-size: 18px;-->
+<!--            margin-bottom: 15px;-->
+<!--            text-decoration: none;-->
+<!--            display: block;-->
+<!--        }-->
+
+<!--        .sidebar a:hover {-->
+<!--            background-color: #0056b3;-->
+<!--            padding-left: 10px;-->
+<!--        }-->
+
+<!--        .content {-->
+<!--            margin-left: 270px;-->
+<!--            padding: 30px;-->
+<!--        }-->
+
+<!--        .card {-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+
+<!--        .card-header {-->
+<!--            font-size: 20px;-->
+<!--            font-weight: bold;-->
+<!--        }-->
+
+<!--        table th, table td {-->
+<!--            text-align: center;-->
+<!--            padding: 10px;-->
+<!--        }-->
+
+<!--        .btn-primary {-->
+<!--            width: 100%;-->
+<!--            padding: 12px;-->
+<!--            font-size: 16px;-->
+<!--            background-color: #007bff;-->
+<!--            border: none;-->
+<!--            color: #fff;-->
+<!--            border-radius: 5px;-->
+<!--        }-->
+
+<!--        .btn-primary:hover {-->
+<!--            background-color: #0056b3;-->
+<!--        }-->
+
+<!--        .header-title {-->
+<!--            font-size: 30px;-->
+<!--            font-weight: bold;-->
+<!--            margin-bottom: 20px;-->
+<!--            color: #333;-->
+<!--        }-->
+
+<!--        @media (max-width: 768px) {-->
+<!--            .sidebar {-->
+<!--                width: 200px;-->
+<!--            }-->
+
+<!--            .content {-->
+<!--                margin-left: 220px;-->
+<!--            }-->
+<!--        }-->
+
+<!--        @media (max-width: 576px) {-->
+<!--            .sidebar {-->
+<!--                width: 100%;-->
+<!--                height: auto;-->
+<!--                position: relative;-->
+<!--            }-->
+
+<!--            .content {-->
+<!--                margin-left: 0;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--    &lt;!&ndash; Sidebar &ndash;&gt;-->
+<!--    <div class="sidebar">-->
+<!--        <h4>Employee Dashboard</h4>-->
+<!--        <a href="google.com">Purchase</a>-->
+<!--        <a href="google.com">Add Stock</a>-->
+<!--        <a href="google.com">Check Expired Drugs</a>-->
+<!--        <a href="/logout">Sign Out</a>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Main Content &ndash;&gt;-->
+<!--    <div class="content">-->
+<!--        <div class="header-title">Stock List for Branch {{ branch_id }}</div>-->
+
+<!--        <div class="card">-->
+<!--            <div class="card-header">-->
+<!--                Available Drugs in Stock-->
+<!--            </div>-->
+<!--            <div class="card-body">-->
+<!--                <table class="table table-bordered table-striped">-->
+<!--                    <thead>-->
+<!--                        <tr>-->
+<!--                            <th>Drug Name</th>-->
+<!--                            <th>Quantity</th>-->
+<!--                            <th>Expiration Date</th>-->
+<!--                        </tr>-->
+<!--                    </thead>-->
+<!--                    <tbody>-->
+<!--                        {% if stock %}-->
+<!--                            {% for drug in stock %}-->
+<!--                                <tr>-->
+<!--                                    <td>{{ drug[0] }}</td>  &lt;!&ndash; drug_name &ndash;&gt;-->
+<!--                                    <td>{{ drug[1] }}</td>  &lt;!&ndash; amount &ndash;&gt;-->
+<!--                                    <td>{{ drug[2] }}</td>  &lt;!&ndash; expiration_date &ndash;&gt;-->
+<!--                                </tr>-->
+<!--                            {% endfor %}-->
+<!--                        {% else %}-->
+<!--                            <tr>-->
+<!--                                <td colspan="3">No drugs available in this branch.</td>-->
+<!--                            </tr>-->
+<!--                        {% endif %}-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--    </div>-->
+
+<!--    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/js/bootstrap.min.js"></script>-->
+
+<!--</body>-->
+<!--</html>-->
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Drug Store</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+        }
+
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            background-color: #2C3E50;
+            padding-top: 20px;
+            padding-left: 20px;
+            color: white;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h4 {
+            color: #fff;
+            margin-bottom: 40px;
+            font-size: 22px;
+        }
+
+        .sidebar a {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar a:hover {
+            background-color: #2980B9;
+            padding-left: 15px;
+        }
+
+        .content {
+            margin-left: 270px;
+            padding: 30px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #34495E;
+            background-color: #ECF0F1;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        table th, table td {
+            text-align: center;
+            padding: 10px;
+        }
+
+        table th {
+            background-color: #3498DB;
+            color: white;
+        }
+
+        .header-title {
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2C3E50;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background-color: #2980B9;
+            border: none;
+            color: #fff;
+            border-radius: 5px;
+        }
+
+        .btn-primary:hover {
+            background-color: #1A5276;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .content {
+                margin-left: 240px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h4>Employee Dashboard</h4>
+        <a href="google.com">Purchase</a>
+        <a href="google.com">Add Stock</a>
+        <a href="google.com">Check Expired Drugs</a>
+        <a href="/logout">Sign Out</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <div class="header-title">Stock List for Branch {{ branch_id }}</div>
+
+        <div class="card">
+            <div class="card-header">
+                Available Drugs in Stock
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Drug Name</th>
+                            <th>Quantity</th>
+                            <th>Expiration Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if stock %}
+                            {% for drug in stock %}
+                                <tr>
+                                    <td>{{ drug[0] }}</td>  <!-- drug_name -->
+                                    <td>{{ drug[1] }}</td>  <!-- amount -->
+                                    <td>{{ drug[2] }}</td>  <!-- expiration_date -->
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3">No drugs available in this branch.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+</body>
+</html>
+

@@ -204,3 +204,93 @@ BEGIN
     END IF;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+-- the function for testing //
+-- CREATE OR REPLACE FUNCTION add_stock(
+--     p_drug_id INT,
+--     p_branch_id INT,
+--     p_amount INT,
+--     p_expiration_date DATE
+-- ) RETURNS TEXT AS $$
+-- DECLARE
+--     current_amount INT;
+-- BEGIN
+--     -- Check if the stock entry already exists for the drug and branch
+--     SELECT amount INTO current_amount
+--     FROM stock
+--     WHERE drug_id = p_drug_id AND branch_id = p_branch_id;
+--
+--     IF FOUND THEN
+--         -- If the stock already exists, update the amount
+--         UPDATE stock
+--         SET amount = amount + p_amount, expiration_date = p_expiration_date
+--         WHERE drug_id = p_drug_id AND branch_id = p_branch_id;
+--         RETURN format('Stock updated: Added %d units to existing stock of Drug ID %d at Branch %d.', p_amount, p_drug_id, p_branch_id);
+--     ELSE
+--         -- Otherwise, insert a new stock entry
+--         INSERT INTO stock (branch_id, drug_id, drug_name, amount, expiration_date)
+--         SELECT p_branch_id, p_drug_id, drug_name, p_amount, p_expiration_date
+--         FROM drugs
+--         WHERE id = p_drug_id;
+--         RETURN format('New stock added: %d units of Drug ID %d at Branch %d.', p_amount, p_drug_id, p_branch_id);
+--     END IF;
+-- END;
+-- $$ LANGUAGE plpgsql;
+--
+-- CREATE SEQUENCE transactions_id_seq START 1;
+-- ALTER TABLE transactions ALTER COLUMN id SET DEFAULT nextval('transactions_id_seq');
+--
+-- ALTER TABLE transactions ALTER COLUMN id SET DEFAULT nextval('transactions_id_seq');
+--
+-- CREATE OR REPLACE FUNCTION make_purchase(
+--     customer_name VARCHAR(255),
+--     p_drug_id INT,
+--     employee_id INT,
+--     p_branch_id INT,
+--     quantity INT
+-- )
+--     RETURNS TEXT AS $$
+-- DECLARE
+--     current_stock INT;
+--     drug_price FLOAT;
+--     drug_name VARCHAR(255);
+-- BEGIN
+--     -- Check if the drug exists and fetch its details
+--     SELECT amount, price, drugs.drug_name
+--     INTO current_stock, drug_price, drug_name
+--     FROM stock
+--              JOIN drugs ON stock.drug_id = drugs.id
+--     WHERE stock.drug_id = p_drug_id AND stock.branch_id = p_branch_id;
+--
+--     IF NOT FOUND THEN
+--         RETURN 'Error: Drug not found in this branch.';
+--     END IF;
+--
+--     -- Check if sufficient stock is available
+--     IF current_stock < quantity THEN
+--         RETURN 'Error: Insufficient stock available.';
+--     END IF;
+--
+--     -- Deduct the quantity from the stock
+--     UPDATE stock
+--     SET amount = amount - quantity
+--     WHERE drug_id = p_drug_id AND branch_id = p_branch_id;
+--
+--     -- Insert the transaction record (relying on auto-increment for id)
+--     INSERT INTO transactions (
+--         purchaser, drug_name, drug_id, employee_id, quantity, price, time, branch_id
+--     )
+--     VALUES (
+--         customer_name, drug_name, p_drug_id, employee_id, quantity, drug_price * quantity, CURRENT_TIMESTAMP, p_branch_id
+--     );
+--
+--     -- Return a success message
+--     RETURN FORMAT(
+--         'Purchase successful! %s x%s bought for $%s',
+--         drug_name, quantity, drug_price * quantity, 2)
+--     ;
+-- END;
+-- $$ LANGUAGE plpgsql;
+-- ALTER TABLE transactions ALTER COLUMN price TYPE NUMERIC(10, 2);
