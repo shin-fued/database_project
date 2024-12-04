@@ -71,6 +71,126 @@ def expired_drugs(branch_id):
         flash(f"Error retrieving expired drugs: {e}", "error")
         return redirect(url_for('index'))
 
+
+@app.route('/expired_drugs/<int:branch_id>', methods=['GET'])
+def expired_drugs(branch_id):
+    """
+    Fetch and display all expired drugs for a specific branch.
+    """
+    try:
+        cur.execute("SELECT * FROM expired(%s)", (branch_id,))
+        expired_drugs = cur.fetchall()
+
+        return render_template('expired_drugs.html', expired_drugs=expired_drugs, branch_id=branch_id)
+    except Exception as e:
+        flash(f"Error retrieving expired drugs: {e}", "error")
+        return redirect(url_for('index'))
+
+@app.route('/api/search_drug', methods=['GET'])
+def search_drug():
+    query = request.args.get('query')
+    cur.execute("SELECT id, drug_name FROM drugs WHERE drug_name ILIKE %s OR id::text = %s LIMIT 1", (f"%{query}%", query))
+    drug = cur.fetchone()
+    if drug:
+        return {'id': drug[0], 'name': drug[1]}
+    return {}
+
+
+
+
+# somehow the process transaction in front end doesnt work properly
+@app.route('/api/process_transaction', methods=['POST'])
+def process_transaction():
+    data = request.get_json()
+    cart = data.get('cart', [])
+    try:
+        for item in cart:
+            cur.execute("SELECT make_purchase(%s, %s, %s, %s, %s)",('Customer Name', item['drug_id'], 1, 1, item['quantity']))  # Replace with actual parameters
+        conn.commit()
+        return {'success': True}
+    except Exception as e:
+        conn.rollback()
+        return {'success': False, 'error': str(e)}
+
+@app.route('/cashier')
+def cashier():
+    return render_template('cashier.html')
+
+
+
+# http://127.0.0.1:5000/add_stock?branch_id=1
+@app.route('/add_stock', methods=['GET', 'POST'])
+def add_stock():
+
+    branch_id = request.args.get('branch_id')
+    if not branch_id:
+        flash('Branch ID is required!', 'danger')
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+
+        drug_id = request.form['drug_id']
+        drug_name = request.form['drug_name']
+        amount = request.form['amount']
+        expiration_date = request.form['expiration_date']
+
+        try:
+            cur.execute("SELECT add_stock(%s, %s, %s, %s, %s)",
+                        (drug_id, drug_name, branch_id, amount, expiration_date))
+            result = cur.fetchone()[0]  # Fetch the result of the function
+
+            conn.commit()
+
+            flash(result, 'success')
+        except Exception as e:
+            conn.rollback()
+            flash(f'Error: {str(e)}', 'danger')
+
+        return redirect(url_for('add_stock', branch_id=branch_id))
+
+    return render_template('add_stock.html', branch_id=branch_id)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+
+
+    return render_template('login.html')
+
+
+# Homepage Route
+@app.route('/home')
+def home():
+    # if 'employee_id' not in session:
+    #     return redirect(url_for('login'))
+
+    return render_template('home.html')
+
+
+# Sign Out Route
+@app.route('/signout', methods=['POST'])
+def signout():
+    # session.pop('employee_id', None)
+    # session.pop('branch_id', None)
+    return redirect(url_for('login'))
+
+
+# Purchase Route
+
+
+
+
+
+
+
+@app.route('/home/<int:branch_id>')
+def home(branch_id):
+    cur.execute("SELECT drug_name, amount, expiration_date FROM stock WHERE branch_id = %s;", (branch_id,))
+    stock = cur.fetchall()
+
+    return render_template('home.html', branch_id=branch_id, stock=stock)
+
+
 @app.route('/user/<username>')
 def profile(username):
     return f'{username}\'s profile'
