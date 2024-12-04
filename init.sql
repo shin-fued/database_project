@@ -1,6 +1,5 @@
 --CREATE TYPE employee_type AS ENUM ('pharmacist', 'staff');
 --CREATE TYPE drug_type AS ENUM ('cough', 'allergy', 'first aid', 'pain relief');
-
 drop table if exists drugs cascade;
 drop table if exists branches cascade;
 drop table if exists employee cascade;
@@ -10,17 +9,17 @@ drop table if exists transactions cascade;
 drop table if exists shift cascade;
 
 create table if not exists drugs(
-                                              id int unique not null generated always as identity,
+                                              id int unique not null  generated always as identity,
                                               drug_name varchar(40),
     brand_name varchar(40) unique,
                                               price float(2),
                                               approval boolean default FALSE,
                                               primary key (id),
-    tag drug_type
+    tag varchar(40)
 );
 
 Create Table if not exists branches(
-                                       id int not null unique generated always as identity,
+                                       id int not null unique,
                                        branch_name varchar(40) not null,
                                        location varchar(255) not null,
                                        primary key (id)
@@ -80,11 +79,12 @@ CREATE TABLE IF NOT EXISTS stock(
                                             references drugs(brand_name),
                                     amount INT not null,
     expiration_date date,
-                                    stock_id int default null,
+                                    id int not null generated always as identity,
+    order_id int,
                                     constraint fk_order
-                                        foreign key(stock_id)
+                                        foreign key(order_id)
                                             references stock_order(order_id),
-            primary key (stock_id)
+            primary key (id)
 );
 
 

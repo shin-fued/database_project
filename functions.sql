@@ -124,7 +124,7 @@ DECLARE
     drug_price drugs.price%TYPE;
     brand drugs.brand_name%TYPE;
 
-    f_stock stock.stock_id%TYPE;
+    f_stock stock.id%TYPE;
         current_stock stock.amount%TYPE;
 BEGIN
     -- Check if the drug exists and fetch its details
@@ -134,9 +134,9 @@ BEGIN
              JOIN drugs ON stock.drug_id = drugs.id
     WHERE stock.drug_id = p_drug_id AND stock.branch_id = p_drug_id;*/
 
-    SELECT stock_id INTO f_stock from stock where drug_id=p_drug_id and branch_id=p_branch_id and expiration_date>CURRENT_DATE ORDER BY expiration_date desc
+    SELECT id INTO f_stock from stock where drug_id=p_drug_id and branch_id=p_branch_id and expiration_date>CURRENT_DATE ORDER BY expiration_date desc
  fetch first 1 rows only;
-SELECT amount into current_stock from stock where stock_id=f_stock;
+SELECT amount into current_stock from stock where id=f_stock;
 
     IF NOT FOUND THEN
         RETURN 'Error: Drug not found in this branch.';
@@ -151,8 +151,8 @@ SELECT amount into current_stock from stock where stock_id=f_stock;
     /*UPDATE stock
     --SET amount = amount - quantity
     --WHERE drug_id = $2 AND branch_id = $4;*/
-SELECT amount into current_stock from stock where stock_id=f_stock;
-Update stock set amount=current_stock-$2 where stock_id=f_stock;
+SELECT amount into current_stock from stock where id=f_stock;
+Update stock set amount=current_stock-$2 where id=f_stock;
     select price, brand_name into drug_price, brand from drugs where id=p_drug_id;
 
     -- Insert the transaction record
