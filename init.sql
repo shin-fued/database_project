@@ -1,5 +1,4 @@
 --CREATE TYPE employee_type AS ENUM ('pharmacist', 'staff');
---CREATE TYPE drug_type AS ENUM ('cough', 'allergy', 'first aid', 'pain relief');
 drop table if exists drugs cascade;
 drop table if exists branches cascade;
 drop table if exists employee cascade;
@@ -12,7 +11,7 @@ create table if not exists drugs(
                                               id int unique not null  generated always as identity,
                                               drug_name varchar(40),
     brand_name varchar(40) unique,
-                                              price float(2),
+                                              price decimal(10,2),
                                               approval boolean default FALSE,
                                               primary key (id),
     tag varchar(40)
@@ -44,6 +43,10 @@ CREATE TABLE IF NOT EXISTS shift(
                                         foreign key(employee_id)
                                             references employee(id),
                                     shift_number INT,
+branch_id int,
+    constraint fk_branch
+        foreign key (branch_id)
+            references branches(id),
                                     primary key (date, shift_number, employee_id)
 );
 
@@ -104,7 +107,7 @@ CREATE TABLE IF NOT EXISTS transactions(
                                                foreign key(employee_id)
                                                    references employee(id),
                                            quantity INT not null,
-                                           price numeric(2) not null,
+                                           price decimal(10,2) not null,
                                            time timestamp not null,
                                            branch_id int,
                                            constraint fk_branch

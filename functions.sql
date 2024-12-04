@@ -111,11 +111,13 @@ RETURN format('removed drug %d from branch %d', $1, $2);
 END;
     $$ LANGUAGE plpgsql;
 
--- purchase function
+
+--drop function make_purchase(customer_name VARCHAR(255), p_drug_id INT, p_employee_id INT, p_branch_id INT, p_quantity INT);
+
 CREATE OR REPLACE FUNCTION make_purchase(
     customer_name VARCHAR(255),
     p_drug_id INT,
-    p_employee_id INT,
+    p_employee_id INT, -- Keep the original parameter name
     p_branch_id INT,
     p_quantity INT
 )
@@ -123,50 +125,54 @@ CREATE OR REPLACE FUNCTION make_purchase(
 DECLARE
     drug_price drugs.price%TYPE;
     brand drugs.brand_name%TYPE;
-
     f_stock stock.id%TYPE;
-        current_stock stock.amount%TYPE;
+    current_stock stock.amount%TYPE;
 BEGIN
-    -- Check if the drug exists and fetch its details
-    /*SELECT amount, price, drugs.drug_name
-    INTO current_stock, drug_price, drug_name
-    FROM stock
-             JOIN drugs ON stock.drug_id = drugs.id
-    WHERE stock.drug_id = p_drug_id AND stock.branch_id = p_drug_id;*/
-
-    SELECT id INTO f_stock from stock where drug_id=p_drug_id and branch_id=p_branch_id and expiration_date>CURRENT_DATE ORDER BY expiration_date desc
- fetch first 1 rows only;
-SELECT amount into current_stock from stock where id=f_stock;
-
-    IF NOT FOUND THEN
-        RETURN 'Error: Drug not found in this branch.';
-    END IF;
+    -- Check if the drug stock exists for the given branch and fetch the nearest expiration stock
+    BEGIN
+        SELECT id, amount
+        INTO f_stock, current_stock
+        FROM stock
+        WHERE drug_id = p_drug_id
+          AND branch_id = p_branch_id
+          AND expiration_date > CURRENT_DATE
+        ORDER BY expiration_date ASC
+        LIMIT 1;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN 'Error: Drug not found or expired in this branch.';
+    END;
 
     -- Check if sufficient stock is available
     IF current_stock < p_quantity THEN
         RETURN 'Error: Insufficient stock available.';
     END IF;
 
-    -- Deduct the quantity from the stock
-    /*UPDATE stock
-    --SET amount = amount - quantity
-    --WHERE drug_id = $2 AND branch_id = $4;*/
-SELECT amount into current_stock from stock where id=f_stock;
-Update stock set amount=current_stock-$2 where id=f_stock;
-    select price, brand_name into drug_price, brand from drugs where id=p_drug_id;
+    -- Deduct the quantity from stock
+    UPDATE stock
+    SET amount = amount - p_quantity
+    WHERE id = f_stock;
+
+    -- Fetch drug details
+    SELECT price, brand_name
+    INTO drug_price, brand
+    FROM drugs
+    WHERE id = p_drug_id;
 
     -- Insert the transaction record
     INSERT INTO transactions (
-        purchaser, brand_name, drug_id, employee_id, quantity,price, time, branch_id
+        purchaser, brand_name, drug_id, employee_id, quantity, price, time, branch_id
     )
     VALUES (
-               customer_name, brand, p_drug_id, p_employee_id, p_quantity,drug_price * p_quantity, CURRENT_TIMESTAMP, p_branch_id
-           );
+        customer_name, brand, p_drug_id, p_employee_id , p_quantity, drug_price * p_quantity , CURRENT_TIMESTAMP, p_branch_id
+    );
 
-    -- Return a success message
-    RETURN FORMAT('Purchase successful! %s x%d bought for $%.2f', brand, p_quantity, drug_price * p_quantity);
+    -- Return success message
+    RETURN FORMAT('Purchase successful! %s x%s bought for $%s', brand, p_quantity, drug_price * p_quantity);
 END;
 $$ LANGUAGE plpgsql;
+
+SELECT make_purchase('Tath', 1, 10, 1, 10);
 
 CREATE OR REPLACE FUNCTION add_stock(
     p_drug_id INT,
