@@ -83,11 +83,14 @@ EXECUTE FUNCTION log_employee_changes();
 -- make order
 CREATE OR REPLACE FUNCTION make_order(
     drug INT,
-    amount_d INT) RETURNS TEXT AS $$
+    amount_d INT,
+    branch INT
+) RETURNS TEXT AS $$
+    DECLARE
 BEGIN
-    INSERT INTO stock_order(drug_id, amount, order_placed, expiration_date, time) values($1, $2, TRUE, ((timestamp '2024-01-01' +
+    INSERT INTO stock_order(drug_id, amount, order_placed, expiration_date, time, branch_id) values($1, $2, TRUE, ((timestamp '2024-01-01' +
                                                                                              random() * (timestamp '2040-12-31' -
-                                                                                                                     timestamp '2024-01-01'))), (select NOW() + (random() * (NOW()+'10 days' - NOW())) + '3 days'));
+                                                                                                                     timestamp '2024-01-01'))), (select NOW() + (random() * (NOW()+'10 days' - NOW())) + '3 days'), $3);
     RETURN 'order placed';
 END;
 $$ LANGUAGE plpgsql;
@@ -96,7 +99,7 @@ $$ LANGUAGE plpgsql;
 --return all expired drugs
 CREATE OR REPLACE FUNCTION expired(b int) returns table(d_id INT, d_name varchar(40), am INT) as $$
 BEGIN
-return query SELECT drug_id, drug_name, amount FROM stock where expiration_date <= current_date and branch_id=$1;
+return query SELECT drug_id, brand_name, amount FROM stock where expiration_date <= current_date and branch_id=$1;
 END;
     $$ LANGUAGE plpgsql;
 
@@ -112,47 +115,56 @@ END;
 CREATE OR REPLACE FUNCTION make_purchase(
     customer_name VARCHAR(255),
     p_drug_id INT,
-    employee_id INT,
+    p_employee_id INT,
     p_branch_id INT,
-    quantity INT
+    p_quantity INT
 )
     RETURNS TEXT AS $$
 DECLARE
-    current_stock INT;
-    drug_price FLOAT;
-    drug_name VARCHAR(255);
+    drug_price drugs.price%TYPE;
+    brand drugs.brand_name%TYPE;
+
+    f_stock stock.stock_id%TYPE;
+        current_stock stock.amount%TYPE;
 BEGIN
     -- Check if the drug exists and fetch its details
-    SELECT amount, price, drugs.drug_name
+    /*SELECT amount, price, drugs.drug_name
     INTO current_stock, drug_price, drug_name
     FROM stock
              JOIN drugs ON stock.drug_id = drugs.id
-    WHERE stock.drug_id = p_drug_id AND stock.branch_id = p_drug_id;
+    WHERE stock.drug_id = p_drug_id AND stock.branch_id = p_drug_id;*/
+
+    SELECT stock_id INTO f_stock from stock where drug_id=p_drug_id and branch_id=p_branch_id and expiration_date>CURRENT_DATE ORDER BY expiration_date desc
+ fetch first 1 rows only;
+SELECT amount into current_stock from stock where stock_id=f_stock;
 
     IF NOT FOUND THEN
         RETURN 'Error: Drug not found in this branch.';
     END IF;
 
     -- Check if sufficient stock is available
-    IF current_stock < quantity THEN
+    IF current_stock < p_quantity THEN
         RETURN 'Error: Insufficient stock available.';
     END IF;
 
     -- Deduct the quantity from the stock
-    UPDATE stock
-    SET amount = amount - quantity
-    WHERE drug_id = $2 AND branch_id = $4;
+    /*UPDATE stock
+    --SET amount = amount - quantity
+    --WHERE drug_id = $2 AND branch_id = $4;*/
+SELECT amount into current_stock from stock where stock_id=f_stock;
+Update stock set amount=current_stock-$2 where stock_id=f_stock;
+    select price, brand_name into drug_price, brand from drugs where id=p_drug_id;
 
     -- Insert the transaction record
     INSERT INTO transactions (
-        purchaser, drug_name, drug_id, employee_id, quantity,price, time, branch_id
+        purchaser, brand_name, drug_id, employee_id, quantity,price, time, branch_id
     )
     VALUES (
-               $1, drug_name, $2, $3, $5,drug_price * $5, CURRENT_TIMESTAMP, $4
+               customer_name, brand, p_drug_id, p_employee_id, p_quantity,drug_price * p_quantity, CURRENT_TIMESTAMP, p_branch_id
            );
 
     -- Return a success message
-    RETURN FORMAT('Purchase successful! %s x%d bought for $%.2f', drug_name, quantity, drug_price * quantity);
+    RETURN FORMAT('Purchase successful! %s x%d bought for $%.2f', brand, p_quantity, drug_price * p_quantity);
 END;
 $$ LANGUAGE plpgsql;
 
@@ -178,8 +190,8 @@ BEGIN
         RETURN format('Stock updated: Added %d units to existing stock of Drug ID %d at Branch %d.', p_amount, p_drug_id, p_branch_id);
     ELSE
         -- Otherwise, insert a new stock entry
-        INSERT INTO stock (branch_id, drug_id, drug_name, amount, expiration_date)
-        SELECT p_branch_id, p_drug_id, drug_name, p_amount, p_expiration_date
+        INSERT INTO stock (branch_id, drug_id, brand_name, amount, expiration_date)
+        SELECT p_branch_id, p_drug_id, brand_name, p_amount, p_expiration_date
         FROM drugs
         WHERE id = p_drug_id;
         RETURN format('New stock added: %d units of Drug ID %d at Branch %d.', p_amount, p_drug_id, p_branch_id);

@@ -12,7 +12,7 @@ drop table if exists shift cascade;
 create table if not exists drugs(
                                               id int unique not null generated always as identity,
                                               drug_name varchar(40),
-    brand_name varchar(40),
+    brand_name varchar(40) unique,
                                               price float(2),
                                               approval boolean default FALSE,
                                               primary key (id),
@@ -58,7 +58,11 @@ create table if not exists stock_order(
                                           time timestamp,
                                           order_placed boolean,
                                             expiration_date date,
-                                          primary key (order_id)
+                                          primary key (order_id),
+    branch_id INT not null,
+    constraint fk_branch
+                                              foreign key(branch_id)
+                                                  references drugs(id)
 );
 
 CREATE TABLE IF NOT EXISTS stock(
@@ -70,7 +74,10 @@ CREATE TABLE IF NOT EXISTS stock(
                                     constraint fk_drug
                                         foreign key(drug_id)
                                             references drugs(id),
-                                    drug_name varchar(255) not null,
+                                    brand_name varchar(255) not null,
+    constraint fk_name
+                                        foreign key(brand_name)
+                                            references drugs(brand_name),
                                     amount INT not null,
     expiration_date date,
                                     stock_id int default null,
@@ -84,7 +91,10 @@ CREATE TABLE IF NOT EXISTS stock(
 CREATE TABLE IF NOT EXISTS transactions(
     id int unique not null generated always as identity,
                                            purchaser VARCHAR(255) not null,
-                                           drug_name VARCHAR(255) not null,
+                                           brand_name VARCHAR(255) not null,
+    constraint fk_name
+        foreign key (brand_name)
+            references drugs(brand_name),
                                            drug_id int not null,
                                            constraint fk_drug
                                                foreign key(drug_id)
