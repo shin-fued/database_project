@@ -147,6 +147,15 @@ BEGIN
     IF current_stock < p_quantity THEN
         RETURN 'Error: Insufficient stock available.';
     END IF;
+    IF (select approval from drugs where id=p_drug_id) and (SELECT type_employee from employee where id=p_employee_id) != 'pharmacist' THEN
+        INSERT INTO transactions (
+        purchaser, brand_name, drug_id, employee_id, quantity, price, time, branch_id, approved
+    )
+    VALUES (
+        customer_name, brand, p_drug_id, p_employee_id , p_quantity, drug_price * p_quantity , CURRENT_TIMESTAMP, p_branch_id, FALSE
+    );
+        RETURN 'Employee not qualified';
+    END IF;
 
     -- Deduct the quantity from stock
     UPDATE stock
@@ -161,10 +170,10 @@ BEGIN
 
     -- Insert the transaction record
     INSERT INTO transactions (
-        purchaser, brand_name, drug_id, employee_id, quantity, price, time, branch_id
+        purchaser, brand_name, drug_id, employee_id, quantity, price, time, branch_id, approved
     )
     VALUES (
-        customer_name, brand, p_drug_id, p_employee_id , p_quantity, drug_price * p_quantity , CURRENT_TIMESTAMP, p_branch_id
+        customer_name, brand, p_drug_id, p_employee_id , p_quantity, drug_price * p_quantity , CURRENT_TIMESTAMP, p_branch_id, TRUE
     );
 
     -- Return success message
