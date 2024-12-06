@@ -119,3 +119,14 @@ INSERT INTO shift(shift_number, employee_id, branch_id, date) values(1,5,1, CURR
 INSERT INTO shift(shift_number, employee_id, branch_id, date) values(1,7,1, CURRENT_DATE
 
 ) ON CONFLICT DO NOTHING;
+
+INSERT INTO shift(shift_number, employee_id, branch_id, date) values(1,8,1, CURRENT_DATE
+
+) ON CONFLICT DO NOTHING;
+INSERT INTO shift(shift_number, employee_id, branch_id, date) values(2,8,2, CURRENT_DATE
+
+) ON CONFLICT DO NOTHING;
+
+INSERT INTO shift(shift_number, employee_id, branch_id, date) values(5,7,1, CURRENT_DATE
+
+) ON CONFLICT DO NOTHING;

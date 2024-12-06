@@ -64,19 +64,43 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_drugs_available_changes
+CREATE OR REPLACE FUNCTION log_stock_changes()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO stock_log(stock_id, branch_id, drug_id, brand_name, amount, expiration_date, order_id, operation_type)
+        VALUES (NEW.id, NEW.branch_id, NEW.drug_id, NEW.brand_name, NEW.amount, NEW.expiration_date, NEW.order_id, 'INSERT');
+        RETURN NEW;
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO stock_log (stock_id, branch_id, drug_id, brand_name, amount, expiration_date, order_id, operation_type)
+        VALUES (OLD.id, OLD.branch_id, OLD.drug_id, OLD.brand_name, OLD.amount, OLD.expiration_date, OLD.order_id, 'UPDATE');
+        RETURN NEW;
+    ELSIF (TG_OP = 'DELETE') THEN
+        INSERT INTO stock_log (stock_id, branch_id, drug_id, brand_name, amount, expiration_date, order_id, operation_type)
+        VALUES (OLD.id, OLD.branch_id, OLD.drug_id, OLD.brand_name, OLD.amount, OLD.expiration_date, OLD.order_id, 'DELETE');
+        RETURN OLD;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE TRIGGER trg_drugs_available_changes
     AFTER INSERT OR UPDATE OR DELETE ON drugs
     FOR EACH ROW
 EXECUTE FUNCTION log_drugs_available_changes();
 
-CREATE TRIGGER trg_branches_changes
+CREATE or replace TRIGGER trg_branches_changes
     AFTER INSERT OR UPDATE OR DELETE ON branches
     FOR EACH ROW
 EXECUTE FUNCTION log_branches_changes();
-CREATE TRIGGER employee_log_trigger
+CREATE or replace TRIGGER employee_log_trigger
     AFTER INSERT OR UPDATE OR DELETE ON employee
     FOR EACH ROW
 EXECUTE FUNCTION log_employee_changes();
+CREATE or replace TRIGGER stock_changes_trigger
+    AFTER INSERT OR UPDATE OR DELETE ON stock
+    FOR EACH ROW
+EXECUTE FUNCTION log_stock_changes();
 -- end of log table features
 
 
@@ -222,16 +246,38 @@ BEGIN
         RAISE EXCEPTION 'Invalid drug ID or brand name: % and %', p_drug_id, brand;
     END IF;
 
+--     SELECT id INTO check_id
+--     FROM stock
+--     WHERE id = p_drug_id AND brand_name = brand and p_expiration_date = expiration_date and branch_id = p_branch_id;
+--     IF FOUND THEN
+--         UPDATE stock
+--         SET amount = 0
+--         WHERE id = p_drug_id AND brand_name = brand and p_expiration_date = expiration_date and branch_id = p_branch_id;
+--         RETURN FORMAT('Stock added successfully for Drug ID: %s, Branch ID: %s, Amount: %s.', p_drug_id, p_branch_id, p_amount);
+--     end if;
+
     -- Insert into stock_order
     INSERT INTO stock_order (drug_id, amount, time, order_placed, expiration_date, branch_id)
     VALUES (p_drug_id, p_amount, NOW(), TRUE, p_expiration_date, p_branch_id)
     RETURNING order_id INTO new_order_id;
 
-    -- Insert into stock
-    INSERT INTO stock (branch_id, drug_id, brand_name, amount, expiration_date, order_id)
-    VALUES (p_branch_id, p_drug_id, brand, p_amount, p_expiration_date, new_order_id);
-
     -- Return success message
     RETURN FORMAT('Stock added successfully for Drug ID: %s, Branch ID: %s, Amount: %s.', p_drug_id, p_branch_id, p_amount);
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- DO $$
+-- BEGIN
+--     PERFORM add_stock(2, 'Brufen', 2,1000, '2038-11-12');
+-- END;
+-- $$;
+--
+-- SELECT * from stock_log;
+
+
+UPDATE stock
+SET amount = 0
+WHERE drug_id = 2 AND brand_name = 'Brufen' and expiration_date = '2038-11-12' and branch_id = 2;
+
+Select * from stock where brand_name = 'Brufen';
