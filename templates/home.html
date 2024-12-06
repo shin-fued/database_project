@@ -570,6 +570,7 @@
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
+                            <th>Drug ID</th>
                             <th>Drug Name</th>
                             <th>Quantity</th>
                             <th>Expiration Date</th>
@@ -579,9 +580,10 @@
                         {% if stock %}
                             {% for drug in stock %}
                                 <tr>
-                                    <td>{{ drug[0] }}</td>  <!-- drug_name -->
-                                    <td>{{ drug[1] }}</td>  <!-- amount -->
-                                    <td>{{ drug[2] }}</td>  <!-- expiration_date -->
+                                    <td>{{ drug[0] }}</td>  <!-- drug_id -->
+                                    <td>{{ drug[1] }}</td><!-- drug_name -->
+                                    <td>{{ drug[2] }}</td>  <!-- amount -->
+                                    <td>{{ drug[3] }}</td>  <!-- expiration_date -->
                                 </tr>
                             {% endfor %}
                         {% else %}

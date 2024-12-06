@@ -9,10 +9,10 @@ from sqlalchemy import create_engine, func
 from sqlalchemy.orm import Session
 
 conn = psycopg2.connect(database="pharmacy_db_loob",
-                                        user="pharmacy_db_loob_user",
-                                        host='dpg-ct22pcm8ii6s73fk6lo0-a.oregon-postgres.render.com',
-                                        password="gFTd7aJRHHb8PYJ6FqcqDOomdSwkQbjv",
-                                        port=5432)
+                        user="pharmacy_db_loob_user",
+                        host='dpg-ct22pcm8ii6s73fk6lo0-a.oregon-postgres.render.com',
+                        password="gFTd7aJRHHb8PYJ6FqcqDOomdSwkQbjv",
+                        port=5432)
 cur = conn.cursor()
 
 app = Flask(__name__)
@@ -22,6 +22,7 @@ app.secret_key = "12345"
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/shift/', methods=('GET', 'POST'))
 def shift():
@@ -40,9 +41,11 @@ def shift():
             t = datetime.now().hour
             day = datetime.now().date().isoformat()
             shift = 2
-            if 8 <= t <=14:
+            if 8 <= t <= 14:
                 shift = 1
-            cur.execute("INSERT INTO shift (date, employee_id, shift_number) values (%s, %s, %s) ON CONFLICT DO NOTHING", (day, id, shift))
+            cur.execute(
+                "INSERT INTO shift (date, employee_id, shift_number) values (%s, %s, %s) ON CONFLICT DO NOTHING",
+                (day, id, shift))
             conn.commit()
             return redirect(url_for('transactions'))
 
@@ -51,7 +54,6 @@ def shift():
 
 @app.route('/transactions/', methods=['POST'])
 def transactions():
-
     return render_template('transactions.html')
 
 
@@ -75,13 +77,12 @@ def expired_drugs(branch_id):
 @app.route('/api/search_drug', methods=['GET'])
 def search_drug():
     query = request.args.get('query')
-    cur.execute("SELECT id, drug_name FROM drugs WHERE drug_name ILIKE %s OR id::text = %s LIMIT 1", (f"%{query}%", query))
+    cur.execute("SELECT id, drug_name FROM drugs WHERE drug_name ILIKE %s OR id::text = %s LIMIT 1",
+                (f"%{query}%", query))
     drug = cur.fetchone()
     if drug:
         return {'id': drug[0], 'name': drug[1]}
     return {}
-
-
 
 
 # somehow the process transaction in front end doesnt work properly
@@ -91,23 +92,23 @@ def process_transaction():
     cart = data.get('cart', [])
     try:
         for item in cart:
-            cur.execute("SELECT make_purchase(%s, %s, %s, %s, %s)",('Customer Name', item['drug_id'], 1, 1, item['quantity']))  # Replace with actual parameters
+            cur.execute("SELECT make_purchase(%s, %s, %s, %s, %s)",
+                        ('Customer Name', item['drug_id'], 1, 1, item['quantity']))  # Replace with actual parameters
         conn.commit()
         return {'success': True}
     except Exception as e:
         conn.rollback()
         return {'success': False, 'error': str(e)}
 
+
 @app.route('/cashier')
 def cashier():
     return render_template('cashier.html')
 
 
-
 # http://127.0.0.1:5000/add_stock?branch_id=1
 @app.route('/add_stock', methods=['GET', 'POST'])
 def add_stock():
-
     branch_id = request.args.get('branch_id')
     if not branch_id:
         flash('Branch ID is required!', 'danger')
@@ -139,18 +140,18 @@ def add_stock():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
-
     return render_template('login.html')
 
 
 # Homepage Route
-@app.route('/home')
-def home():
+@app.route('/home/<int:branch_id>')
+def home(branch_id):
     # if 'employee_id' not in session:
     #     return redirect(url_for('login'))
-
-    return render_template('home.html')
+    #    cur.execute("SELECT s.drug_id, d.drug_name, d.brand_name, s.amount, s.expiration_date FROM stock as s right JOIN drugs as d ON s.drug_id = d.id where s.branch_id=%s", (branch_id,))
+    cur.execute(" SELECT s.drug_id , d.drug_name, amount, expiration_date FROM stock as s inner join drugs as d on s.drug_id = d.id where branch_id = %s ORDER BY expiration_date", (branch_id,))
+    stock = cur.fetchall()
+    return render_template('home.html', stock=stock, branch_id = branch_id)
 
 
 # Sign Out Route
@@ -162,11 +163,6 @@ def signout():
 
 
 # Purchase Route
-
-
-
-
-
 
 
 # @app.route('/home/<int:branch_id>')
@@ -181,6 +177,7 @@ def signout():
 def profile(username):
     return f'{username}\'s profile'
 
+
 with app.test_request_context():
     print(url_for('index'))
     print(url_for('shift'))
@@ -188,4 +185,3 @@ with app.test_request_context():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
