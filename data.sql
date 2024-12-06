@@ -93,3 +93,19 @@ INSERT INTO stock(branch_id, drug_id,brand_name, amount,expiration_date) VALUES 
 INSERT INTO stock(branch_id, drug_id,brand_name, amount,expiration_date) VALUES (2, (SELECT id from drugs WHERE brand_name='Lantus'),'Lantus', 1000, '2026-06-16') ON CONFLICT DO NOTHING;
 
 
+SELECT make_order(10, 1000, 2);
+SELECT make_order(20, 1000, 2);
+SELECT make_order(2, 1001, 1);
+SELECT make_order(23, 1001, 1);
+
+SELECT make_purchase('aaaa', 1, 1, 1,3);
+
+select make_purchase('cccc', 6, 4, 1, 4);
+select make_purchase('eeee', 6, 4, 1, 4);
+
+
+
+
+
+
+

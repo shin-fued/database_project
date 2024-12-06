@@ -26,7 +26,7 @@ Create Table if not exists branches(
 
 CREATE TABLE IF NOT EXISTS employee (
                                         id INT not null unique generated always as identity,
-                                        employee_name VARCHAR(255) not null,
+                                        employee_name VARCHAR(255) not null unique ,
                                         employee_salary INT not null,
                                         type_employee employee_type not null,
                                         branch_id int,
