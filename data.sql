@@ -104,8 +104,18 @@ select make_purchase('cccc', 6, 4, 1, 4);
 select make_purchase('eeee', 6, 4, 1, 4);
 
 
+INSERT INTO shift(shift_number, employee_id, branch_id, date) values(1,1,1, CURRENT_DATE
 
+) ON CONFLICT DO NOTHING;
 
+INSERT INTO shift(shift_number, employee_id, branch_id, date) values(3,2,2, CURRENT_DATE
 
+) ON CONFLICT DO NOTHING;
 
+INSERT INTO shift(shift_number, employee_id, branch_id, date) values(1,5,1, CURRENT_DATE
 
+) ON CONFLICT DO NOTHING;
+
+INSERT INTO shift(shift_number, employee_id, branch_id, date) values(1,7,1, CURRENT_DATE
+
+) ON CONFLICT DO NOTHING;
