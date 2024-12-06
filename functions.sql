@@ -97,9 +97,10 @@ $$ LANGUAGE plpgsql;
 
 
 --return all expired drugs
-CREATE OR REPLACE FUNCTION expired(b int) returns table(d_id INT, d_name varchar(40), am INT) as $$
+DROP FUNCTION expired(integer);
+CREATE OR REPLACE FUNCTION expired(b int) returns table(d_id INT, d_drug varchar(40),d_brand varchar(40), am INT, exp date) as $$
 BEGIN
-return query SELECT drug_id, brand_name, amount FROM stock where expiration_date <= current_date and branch_id=$1;
+return query SELECT s.drug_id, d.drug_name, d.brand_name, s.amount, s.expiration_date FROM stock as s right JOIN drugs as d ON s.drug_id = d.id where s.expiration_date <= current_date and s.branch_id=$1;
 END;
     $$ LANGUAGE plpgsql;
 
@@ -231,4 +232,3 @@ BEGIN
     RETURN FORMAT('Stock added successfully for Drug ID: %s, Branch ID: %s, Amount: %s.', p_drug_id, p_branch_id, p_amount);
 END;
 $$ LANGUAGE plpgsql;
-
