@@ -197,6 +197,161 @@
 
 
 
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Cashier</title>-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">-->
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <script>-->
+<!--        async function searchDrug(query) {-->
+<!--            const response = await fetch(`/api/search_drug?query=${query}`);-->
+<!--            return response.json();-->
+<!--        }-->
+
+<!--        function addDrugToCart() {-->
+<!--            const drugQuery = document.getElementById("drug_query").value.trim();-->
+<!--            const quantity = parseInt(document.getElementById("quantity").value, 10);-->
+<!--            const branchId = parseInt(document.getElementById("branch_id").value, 10);-->
+
+<!--            if (!drugQuery || isNaN(quantity) || isNaN(branchId) || quantity <= 0) {-->
+<!--                alert("Please fill in all fields with valid values.");-->
+<!--                return;-->
+<!--            }-->
+
+<!--            searchDrug(drugQuery).then((drug) => {-->
+<!--                if (drug && drug.id) {-->
+<!--                    const cartTable = document.getElementById("cartTableBody");-->
+<!--                    const row = document.createElement("tr");-->
+<!--                    row.innerHTML = `-->
+<!--                        <td>${drug.id}</td>-->
+<!--                        <td>${drug.name}</td>-->
+<!--                        <td>${quantity}</td>-->
+<!--                        <td>${branchId}</td>-->
+<!--                        <td>-->
+<!--                            <button class="btn btn-danger btn-sm" onclick="removeFromCart(this)">-->
+<!--                                <i class="fas fa-trash-alt"></i> Remove-->
+<!--                            </button>-->
+<!--                        </td>-->
+<!--                    `;-->
+<!--                    cartTable.appendChild(row);-->
+
+<!--                    document.getElementById("drug_query").value = "";-->
+<!--                    document.getElementById("quantity").value = "";-->
+<!--                } else {-->
+<!--                    alert("Drug not found. Please try another query.");-->
+<!--                }-->
+<!--            });-->
+<!--        }-->
+
+<!--        function removeFromCart(button) {-->
+<!--            button.parentElement.parentElement.remove();-->
+<!--        }-->
+
+<!--        async function processTransaction() {-->
+<!--            const cartTable = document.getElementById("cartTableBody");-->
+<!--            const rows = cartTable.getElementsByTagName("tr");-->
+<!--            const cart = [];-->
+
+<!--            for (const row of rows) {-->
+<!--                const cells = row.getElementsByTagName("td");-->
+<!--                cart.push({-->
+<!--                    drug_id: parseInt(cells[0].innerText, 10),-->
+<!--                    quantity: parseInt(cells[2].innerText, 10),-->
+<!--                    branch_id: parseInt(cells[3].innerText, 10),-->
+<!--                });-->
+<!--            }-->
+
+<!--            if (cart.length === 0) {-->
+<!--                alert("Cart is empty. Please add items to the cart.");-->
+<!--                return;-->
+<!--            }-->
+
+<!--            try {-->
+<!--                const response = await fetch("/api/process_transaction", {-->
+<!--                    method: "POST",-->
+<!--                    headers: {-->
+<!--                        "Content-Type": "application/json",-->
+<!--                    },-->
+<!--                    body: JSON.stringify({ cart }),-->
+<!--                });-->
+<!--                const result = await response.json();-->
+
+<!--                if (result.success) {-->
+<!--                    alert("Transaction processed successfully!");-->
+<!--                    cartTable.innerHTML = ""; // Clear cart-->
+<!--                } else {-->
+<!--                    alert(`Transaction failed: ${result.error}`);-->
+<!--                }-->
+<!--            } catch (error) {-->
+<!--                console.error(error);-->
+<!--                alert("An error occurred while processing the transaction.");-->
+<!--            }-->
+<!--        }-->
+<!--    </script>-->
+<!--</head>-->
+<!--<body class="bg-light">-->
+<!--    <div class="container py-5">-->
+<!--        <h1 class="text-center mb-4">Cashier System</h1>-->
+<!--        <div class="card shadow-sm mb-4">-->
+<!--            <div class="card-body">-->
+<!--                <form id="addDrugForm">-->
+<!--                    <div class="row mb-3">-->
+<!--                        <div class="col-md-4">-->
+<!--                            <label for="drug_query" class="form-label">Search Drug by Name or ID:</label>-->
+<!--                            <input type="text" id="drug_query" class="form-control" placeholder="Enter drug name or ID">-->
+<!--                        </div>-->
+<!--                        <div class="col-md-2">-->
+<!--                            <label for="quantity" class="form-label">Quantity:</label>-->
+<!--                            <input type="number" id="quantity" class="form-control" placeholder="Enter quantity">-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3">-->
+<!--                            <label for="branch_id" class="form-label">Branch ID:</label>-->
+<!--                            <input type="number" id="branch_id" class="form-control" placeholder="Enter branch ID">-->
+<!--                        </div>-->
+<!--                        <div class="col-md-3 d-flex align-items-end">-->
+<!--                            <button type="button" class="btn btn-primary w-100" onclick="addDrugToCart()">-->
+<!--                                <i class="fas fa-plus-circle"></i> Add to Cart-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="card shadow-sm">-->
+<!--            <div class="card-body">-->
+<!--                <h2 class="text-center mb-4">Cart</h2>-->
+<!--                <table class="table table-striped table-bordered">-->
+<!--                    <thead class="table-dark">-->
+<!--                        <tr>-->
+<!--                            <th scope="col">Drug ID</th>-->
+<!--                            <th scope="col">Drug Name</th>-->
+<!--                            <th scope="col">Quantity</th>-->
+<!--                            <th scope="col">Branch ID</th>-->
+<!--                            <th scope="col">Actions</th>-->
+<!--                        </tr>-->
+<!--                    </thead>-->
+<!--                    <tbody id="cartTableBody">-->
+<!--                        &lt;!&ndash; Cart items will be dynamically added here &ndash;&gt;-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!--                <div class="text-center mt-4">-->
+<!--                    <button class="btn btn-success btn-lg" onclick="processTransaction()">-->
+<!--                        <i class="fas fa-check-circle"></i> Process Transaction-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>-->
+<!--</body>-->
+<!--</html>-->
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -206,17 +361,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <script>
+        const branchId = {{ branch_id }}; // Inject branch_id dynamically
+
         async function searchDrug(query) {
-            const response = await fetch(`/api/search_drug?query=${query}`);
+            const response = await fetch(`/api/search_drug?query=${encodeURIComponent(query)}&branch_id=${branchId}`);
             return response.json();
         }
 
         function addDrugToCart() {
             const drugQuery = document.getElementById("drug_query").value.trim();
             const quantity = parseInt(document.getElementById("quantity").value, 10);
-            const branchId = parseInt(document.getElementById("branch_id").value, 10);
 
-            if (!drugQuery || isNaN(quantity) || isNaN(branchId) || quantity <= 0) {
+            if (!drugQuery || isNaN(quantity) || quantity <= 0) {
                 alert("Please fill in all fields with valid values.");
                 return;
             }
@@ -241,7 +397,7 @@
                     document.getElementById("drug_query").value = "";
                     document.getElementById("quantity").value = "";
                 } else {
-                    alert("Drug not found. Please try another query.");
+                    alert("Drug not found or not available for this branch. Please try another query.");
                 }
             });
         }
@@ -260,7 +416,7 @@
                 cart.push({
                     drug_id: parseInt(cells[0].innerText, 10),
                     quantity: parseInt(cells[2].innerText, 10),
-                    branch_id: parseInt(cells[3].innerText, 10),
+                    branch_id: branchId, // Use the dynamic branch_id
                 });
             }
 
@@ -294,24 +450,20 @@
 </head>
 <body class="bg-light">
     <div class="container py-5">
-        <h1 class="text-center mb-4">Cashier System</h1>
+        <h1 class="text-center mb-4">Cashier System for Branch {{ branch_id }}</h1>
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <form id="addDrugForm">
                     <div class="row mb-3">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label for="drug_query" class="form-label">Search Drug by Name or ID:</label>
                             <input type="text" id="drug_query" class="form-control" placeholder="Enter drug name or ID">
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-4">
                             <label for="quantity" class="form-label">Quantity:</label>
                             <input type="number" id="quantity" class="form-control" placeholder="Enter quantity">
                         </div>
-                        <div class="col-md-3">
-                            <label for="branch_id" class="form-label">Branch ID:</label>
-                            <input type="number" id="branch_id" class="form-control" placeholder="Enter branch ID">
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
+                        <div class="col-md-2 d-flex align-items-end">
                             <button type="button" class="btn btn-primary w-100" onclick="addDrugToCart()">
                                 <i class="fas fa-plus-circle"></i> Add to Cart
                             </button>

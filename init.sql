@@ -148,3 +148,17 @@ CREATE TABLE IF NOT EXISTS employee_log (
                                             type_employee employee_type,
                                             branch_id INT
 );
+
+
+CREATE TABLE IF NOT EXISTS stock_log (
+    log_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    stock_id INT,
+    branch_id INT,
+    drug_id INT,
+    brand_name VARCHAR(255),
+    amount INT,
+    expiration_date DATE,
+    order_id INT,
+    operation_type VARCHAR(50) NOT NULL,
+    operation_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

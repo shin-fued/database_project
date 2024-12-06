@@ -1,4 +1,4 @@
-import flet as ft
+#import flet as ft
 import psycopg2
 from datetime import datetime
 
@@ -101,9 +101,9 @@ def process_transaction():
         return {'success': False, 'error': str(e)}
 
 
-@app.route('/cashier')
-def cashier():
-    return render_template('cashier.html')
+@app.route('/cashier/<int:branch_id>')
+def cashier(branch_id):
+    return render_template('cashier.html', branch_id=branch_id)
 
 
 # http://127.0.0.1:5000/add_stock?branch_id=1
@@ -149,7 +149,7 @@ def home(branch_id):
     # if 'employee_id' not in session:
     #     return redirect(url_for('login'))
     #    cur.execute("SELECT s.drug_id, d.drug_name, d.brand_name, s.amount, s.expiration_date FROM stock as s right JOIN drugs as d ON s.drug_id = d.id where s.branch_id=%s", (branch_id,))
-    cur.execute(" SELECT s.drug_id , d.drug_name, amount, expiration_date FROM stock as s inner join drugs as d on s.drug_id = d.id where branch_id = %s ORDER BY expiration_date", (branch_id,))
+    cur.execute(" SELECT s.drug_id , d.drug_name, d.brand_name,amount, expiration_date FROM stock as s inner join drugs as d on s.drug_id = d.id where branch_id = %s ORDER BY expiration_date", (branch_id,))
     stock = cur.fetchall()
     return render_template('home.html', stock=stock, branch_id = branch_id)
 

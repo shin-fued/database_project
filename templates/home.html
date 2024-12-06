@@ -572,6 +572,7 @@
                         <tr>
                             <th>Drug ID</th>
                             <th>Drug Name</th>
+                            <th>Brand</th>
                             <th>Quantity</th>
                             <th>Expiration Date</th>
                         </tr>
@@ -582,8 +583,9 @@
                                 <tr>
                                     <td>{{ drug[0] }}</td>  <!-- drug_id -->
                                     <td>{{ drug[1] }}</td><!-- drug_name -->
-                                    <td>{{ drug[2] }}</td>  <!-- amount -->
-                                    <td>{{ drug[3] }}</td>  <!-- expiration_date -->
+                                    <td>{{ drug[2] }}</td>  <!-- brand -->
+                                    <td>{{ drug[3] }}</td>  <!-- amount -->
+                                    <td>{{ drug[4] }}</td> <!-- expiration_date -->
                                 </tr>
                             {% endfor %}
                         {% else %}
